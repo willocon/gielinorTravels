@@ -6,7 +6,10 @@ import lombok.extern.slf4j.Slf4j;
 import net.runelite.api.ChatMessageType;
 import net.runelite.api.Client;
 import net.runelite.api.GameState;
+import net.runelite.api.coords.WorldPoint;
+import net.runelite.api.coords.LocalPoint;
 import net.runelite.api.events.GameStateChanged;
+import net.runelite.api.events.GameTick;
 import net.runelite.client.config.ConfigManager;
 import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.plugins.Plugin;
@@ -35,14 +38,14 @@ public class ExamplePlugin extends Plugin
 	{
 		log.info("Example stopped!");
 	}
+    final WorldPoint destination = new WorldPoint(3245,3225,0);
 
 	@Subscribe
-	public void onGameStateChanged(GameStateChanged gameStateChanged)
-	{
-		if (gameStateChanged.getGameState() == GameState.LOGGED_IN)
-		{
-			client.addChatMessage(ChatMessageType.GAMEMESSAGE, "", "Example says " + config.greeting(), null);
-		}
+	public void onGameTick(GameTick tick)
+    {
+            final WorldPoint playerPos = client.getLocalPlayer().getWorldLocation();
+            if (playerPos.equals(destination))
+                client.addChatMessage(ChatMessageType.GAMEMESSAGE, "", "Reached destination Tile!: " + playerPos, null);
 	}
 
 	@Provides
