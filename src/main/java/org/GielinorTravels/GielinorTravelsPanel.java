@@ -1,21 +1,22 @@
 package org.GielinorTravels;
 
-import net.runelite.client.ui.ColorScheme;
 import net.runelite.client.ui.PluginPanel;
-import net.runelite.client.ui.FontManager;
+import net.runelite.client.util.ImageUtil;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
+import java.awt.event.ActionEvent;
+import java.awt.image.BufferedImage;
 
 public class GielinorTravelsPanel extends PluginPanel
 {
 
-    public GielinorTravelsPanel(GielinorTravelsPlugin plugin, GielinorTravelsConfig config)
-    {
+    private final GielinorTravelsPlugin plugin;
+
+    public GielinorTravelsPanel(GielinorTravelsPlugin plugin, GielinorTravelsConfig config){
         super();
+        this.plugin = plugin;
 
         setLayout(new BorderLayout(0, 10));
         setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
@@ -24,89 +25,37 @@ public class GielinorTravelsPanel extends PluginPanel
         label.setForeground(Color.LIGHT_GRAY);
         label.setHorizontalAlignment(SwingConstants.CENTER);
 
-        JPanel actionsContainer = new JPanel();
-        actionsContainer.setBorder(new EmptyBorder(10, 0, 0, 0));
-        actionsContainer.setLayout(new GridLayout(0, 1, 0, 10));
+        BufferedImage locationImg = ImageUtil.loadImageResource(GielinorTravelsPlugin.class, "/imgs/3.png");
+        JLabel picLabel = new JLabel();
+        JPanel picPanel = new JPanel();
+        picPanel.setBorder(new EmptyBorder(0,0,0,0));
+        picPanel.setLayout(new GridLayout(1, 1, 5, 5));
 
-        actionsContainer.add(buildLinkPanel("Show in-game location",plugin));
+        // Sidebar width is ~200px depending on RuneLite scaling,
+        // so we resize to fit the panel width while keeping aspect ratio.
+        int panelWidth = Math.max(220, getWidth());
+        int imgWidth = locationImg.getWidth();
+        int imgHeight = locationImg.getHeight();
+        double scale = (double) panelWidth / imgWidth;
 
+        int newWidth = (int) (imgWidth * scale);
+        int newHeight = (int) (imgHeight * scale);
 
-//        JButton locationButton = new JButton("Show Location");
-//        locationButton.addActionListener(e ->  new GielinorTravelsPlugin().showLocation());
+        Image scaled = locationImg.getScaledInstance(newWidth, newHeight, Image.SCALE_SMOOTH);
+        picLabel.setIcon(new ImageIcon(scaled));
+
+        JButton showButton = new JButton("Show Location");
+        showButton.addActionListener(this::onShowButtonClicked);
+
+        picPanel.add(picLabel,BorderLayout.NORTH);
 
         add(label, BorderLayout.NORTH);
-        add(actionsContainer,BorderLayout.CENTER);
-
+        add(picPanel,BorderLayout.CENTER);
+        add(showButton,BorderLayout.SOUTH);
     }
-    private static JPanel buildLinkPanel(String topText, GielinorTravelsPlugin plugin)
-    {
-        JPanel container = new JPanel();
-        container.setBackground(ColorScheme.DARKER_GRAY_COLOR);
-        container.setLayout(new BorderLayout());
-        container.setBorder(new EmptyBorder(10, 10, 10, 10));
 
-        final Color hoverColor = ColorScheme.DARKER_GRAY_HOVER_COLOR;
-        final Color pressedColor = ColorScheme.DARKER_GRAY_COLOR.brighter();
-
-//        JLabel iconLabel = new JLabel(icon);
-//        container.add(iconLabel, BorderLayout.WEST);
-
-        JPanel textContainer = new JPanel();
-        textContainer.setBackground(ColorScheme.DARKER_GRAY_COLOR);
-        textContainer.setLayout(new GridLayout(2, 1));
-        textContainer.setBorder(new EmptyBorder(5, 10, 5, 10));
-
-        String bottomText = "";
-        
-        container.addMouseListener(new MouseAdapter()
-        {
-
-            @Override
-            public void mousePressed(MouseEvent mouseEvent)
-            {
-                container.setBackground(pressedColor);
-                textContainer.setBackground(pressedColor);
-            }
-
-            @Override
-            public void mouseReleased(MouseEvent e)
-            {
-                plugin.showLocation();
-                container.setBackground(hoverColor);
-                textContainer.setBackground(hoverColor);
-            }
-
-            @Override
-            public void mouseEntered(MouseEvent e)
-            {
-                container.setBackground(hoverColor);
-                textContainer.setBackground(hoverColor);
-                container.setCursor(new Cursor(Cursor.HAND_CURSOR));
-            }
-
-            @Override
-            public void mouseExited(MouseEvent e)
-            {
-                container.setBackground(ColorScheme.DARKER_GRAY_COLOR);
-                textContainer.setBackground(ColorScheme.DARKER_GRAY_COLOR);
-                container.setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
-            }
-        });
-
-        JLabel topLine = new JLabel(topText);
-        topLine.setForeground(Color.WHITE);
-        topLine.setFont(FontManager.getRunescapeSmallFont());
-
-        JLabel bottomLine = new JLabel(bottomText);
-        bottomLine.setForeground(Color.WHITE);
-        bottomLine.setFont(FontManager.getRunescapeSmallFont());
-
-        textContainer.add(topLine);
-        textContainer.add(bottomLine);
-
-        container.add(textContainer, BorderLayout.CENTER);
-
-        return container;
+    private void onShowButtonClicked(ActionEvent e){
+        plugin.showLocation();
     }
 
 }

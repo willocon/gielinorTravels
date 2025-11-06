@@ -14,6 +14,7 @@ import net.runelite.client.plugins.Plugin;
 import net.runelite.client.plugins.PluginDescriptor;
 import net.runelite.client.ui.ClientToolbar;
 import net.runelite.client.ui.NavigationButton;
+import net.runelite.client.util.ImageUtil;
 
 import java.awt.image.BufferedImage;
 
@@ -43,7 +44,7 @@ public class GielinorTravelsPlugin extends Plugin
 	{
         panel = new GielinorTravelsPanel(this,config);
 
-        final BufferedImage icon = new BufferedImage(32, 32, BufferedImage.TYPE_INT_ARGB);
+        final BufferedImage icon = ImageUtil.loadImageResource(GielinorTravelsPlugin.class, "/icon.png");
 
         navButton = NavigationButton.builder()
                 .tooltip("Example Panel")
