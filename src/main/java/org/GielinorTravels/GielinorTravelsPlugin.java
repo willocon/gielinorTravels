@@ -14,6 +14,7 @@ import net.runelite.client.plugins.Plugin;
 import net.runelite.client.plugins.PluginDescriptor;
 import net.runelite.client.ui.ClientToolbar;
 import net.runelite.client.ui.NavigationButton;
+import net.runelite.client.ui.overlay.OverlayManager;
 import net.runelite.client.util.ImageUtil;
 
 import java.awt.image.BufferedImage;
@@ -36,15 +37,32 @@ public class GielinorTravelsPlugin extends Plugin
     @Inject
     private ClientToolbar clientToolbar;
 
+    @Inject
+    private OverlayManager overlayManager;
+
+    @Inject
+    private LocationOverlay overlay;
+
     private NavigationButton navButton;
     private GielinorTravelsPanel panel;
 
     private WorldPoint destination;
 
+    //Overlay logic
+    private boolean showOverlayImage = false;
+    private int ticksRemaining = 0;
+    private final int TOTAL_TICKS = 10;
+
+    //timing logic
+    private int timerTicks;
+    private boolean isFound = false;
+
 
     @Override
 	protected void startUp() throws Exception
 	{
+        overlayManager.add(overlay);
+
         panel = new GielinorTravelsPanel(this,config);
 
         final BufferedImage icon = ImageUtil.loadImageResource(GielinorTravelsPlugin.class, "/icon.png");
@@ -66,6 +84,7 @@ public class GielinorTravelsPlugin extends Plugin
 	@Override
 	protected void shutDown() throws Exception
 	{
+        overlayManager.remove(overlay);
         clientToolbar.removeNavigation(navButton);
         panel = null;
         log.info("Example stopped!");
@@ -74,9 +93,22 @@ public class GielinorTravelsPlugin extends Plugin
 	@Subscribe
 	public void onGameTick(GameTick tick)
     {
-            final WorldPoint playerPos = client.getLocalPlayer().getWorldLocation();
-            if (playerPos.equals(destination))
-                client.addChatMessage(ChatMessageType.GAMEMESSAGE, "", "Reached destination Tile!: " + playerPos, null);
+        final WorldPoint playerPos = client.getLocalPlayer().getWorldLocation();
+        if (!isFound) {
+            if (playerPos.equals(destination)) {
+                client.addChatMessage(ChatMessageType.GAMEMESSAGE, "", "Reached destination Tile!: " + playerPos + " in " + timerTicks + " ticks!", null);
+                isFound = true;
+            }
+        }
+        timerTicks++;
+        if (showOverlayImage){
+            ticksRemaining--;
+            if (ticksRemaining <= 0){
+                showOverlayImage = false;
+                timerTicks = 0;
+                isFound=false;
+            }
+        }
 	}
 
     public void showLocation() {
@@ -94,6 +126,22 @@ public class GielinorTravelsPlugin extends Plugin
     public void setDestination(WorldPoint newDestination){
         destination = newDestination;
     }
+
+    public void showOverlay()
+    {
+        showOverlayImage = true;
+        ticksRemaining = TOTAL_TICKS;
+    }
+
+    public boolean isOverlayVisible()
+    {
+        return showOverlayImage;
+    }
+
+    public void changeOverlayImage(BufferedImage newImg){
+        overlay.setOverlayImage(newImg);
+    }
+
 
 	@Provides
     GielinorTravelsConfig provideConfig(ConfigManager configManager)

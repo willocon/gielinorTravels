@@ -65,6 +65,8 @@ public class GielinorTravelsPanel extends PluginPanel
         LocationLoader location = new LocationLoader();
         setScaledImage(location.getLocationImg());
         plugin.setDestination(location.getDestination());
+        plugin.changeOverlayImage(location.getLocationImg());
+        plugin.showOverlay();
     }
 
     private void setScaledImage(BufferedImage locationImg){
