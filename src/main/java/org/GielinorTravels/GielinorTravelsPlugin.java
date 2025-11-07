@@ -39,7 +39,10 @@ public class GielinorTravelsPlugin extends Plugin
     private NavigationButton navButton;
     private GielinorTravelsPanel panel;
 
-	@Override
+    private WorldPoint destination;
+
+
+    @Override
 	protected void startUp() throws Exception
 	{
         panel = new GielinorTravelsPanel(this,config);
@@ -55,6 +58,8 @@ public class GielinorTravelsPlugin extends Plugin
 
         clientToolbar.addNavigation(navButton);
 
+        destination = new WorldPoint(3245,3225,0);
+
 		log.info("Example started!");
 	}
 
@@ -65,7 +70,6 @@ public class GielinorTravelsPlugin extends Plugin
         panel = null;
         log.info("Example stopped!");
 	}
-    final WorldPoint destination = new WorldPoint(3245,3225,0);
 
 	@Subscribe
 	public void onGameTick(GameTick tick)
@@ -78,15 +82,17 @@ public class GielinorTravelsPlugin extends Plugin
     public void showLocation() {
         clientThread.invoke(() -> {
             if (client.getLocalPlayer() == null) {
-//            panel.setLocationText("Player not found.");
                 return;
             }
             WorldPoint playerPos = client.getLocalPlayer().getWorldLocation();
             String coords = String.format("X: %d, Y: %d, Plane: %d", playerPos.getX(), playerPos.getY(), playerPos.getPlane());
-//        panel.setLocationText(coords);
             client.addChatMessage(ChatMessageType.GAMEMESSAGE, "", "Current co-ord: " + coords, null);
 
         });
+    }
+
+    public void setDestination(WorldPoint newDestination){
+        destination = newDestination;
     }
 
 	@Provides

@@ -14,6 +14,11 @@ public class GielinorTravelsPanel extends PluginPanel
 
     private final GielinorTravelsPlugin plugin;
 
+    private final JButton showButton = new JButton("Show Location");
+    private final JButton startButton = new JButton("Start");
+    private final JLabel picLabel = new JLabel();
+
+
     public GielinorTravelsPanel(GielinorTravelsPlugin plugin, GielinorTravelsConfig config){
         super();
         this.plugin = plugin;
@@ -25,12 +30,44 @@ public class GielinorTravelsPanel extends PluginPanel
         label.setForeground(Color.LIGHT_GRAY);
         label.setHorizontalAlignment(SwingConstants.CENTER);
 
-        BufferedImage locationImg = ImageUtil.loadImageResource(GielinorTravelsPlugin.class, "/imgs/3.png");
-        JLabel picLabel = new JLabel();
+        BufferedImage locationImg = ImageUtil.loadImageResource(GielinorTravelsPlugin.class, "/locations/1/1.png");
         JPanel picPanel = new JPanel();
         picPanel.setBorder(new EmptyBorder(0,0,0,0));
         picPanel.setLayout(new GridLayout(1, 1, 5, 5));
 
+        // Sidebar width is ~200px depending on RuneLite scaling,
+        // so we resize to fit the panel width while keeping aspect ratio.
+        setScaledImage(locationImg);
+
+        picPanel.add(picLabel,BorderLayout.NORTH);
+
+        JPanel buttonPanel = new JPanel();
+        buttonPanel.setBorder(new EmptyBorder(0,0,0,0));
+        buttonPanel.setLayout(new GridLayout(2,1,5,5));
+
+
+        showButton.addActionListener(this::onShowButtonClicked);
+        startButton.addActionListener(this::onStartButtonClicked);
+
+        buttonPanel.add(showButton);
+        buttonPanel.add(startButton);
+
+        add(label, BorderLayout.NORTH);
+        add(picPanel,BorderLayout.CENTER);
+        add(buttonPanel,BorderLayout.SOUTH);
+    }
+
+    private void onShowButtonClicked(ActionEvent e){
+        plugin.showLocation();
+    }
+
+    private void onStartButtonClicked(ActionEvent e){
+        LocationLoader location = new LocationLoader();
+        setScaledImage(location.getLocationImg());
+        plugin.setDestination(location.getDestination());
+    }
+
+    private void setScaledImage(BufferedImage locationImg){
         // Sidebar width is ~200px depending on RuneLite scaling,
         // so we resize to fit the panel width while keeping aspect ratio.
         int panelWidth = Math.max(220, getWidth());
@@ -44,18 +81,8 @@ public class GielinorTravelsPanel extends PluginPanel
         Image scaled = locationImg.getScaledInstance(newWidth, newHeight, Image.SCALE_SMOOTH);
         picLabel.setIcon(new ImageIcon(scaled));
 
-        JButton showButton = new JButton("Show Location");
-        showButton.addActionListener(this::onShowButtonClicked);
-
-        picPanel.add(picLabel,BorderLayout.NORTH);
-
-        add(label, BorderLayout.NORTH);
-        add(picPanel,BorderLayout.CENTER);
-        add(showButton,BorderLayout.SOUTH);
-    }
-
-    private void onShowButtonClicked(ActionEvent e){
-        plugin.showLocation();
+        picLabel.revalidate();
+        picLabel.repaint();
     }
 
 }
