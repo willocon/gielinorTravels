@@ -13,9 +13,12 @@ public class GielinorTravelsPanel extends PluginPanel
 {
 
     private final GielinorTravelsPlugin plugin;
+    private LocationLoader location;
+
+    private boolean inQueue = false;
 
     private final JButton showButton = new JButton("Show Location");
-    private final JButton startButton = new JButton("Start");
+    private final JButton startButton = new JButton("Join Lobby");
     private final JLabel picLabel = new JLabel();
 
 
@@ -30,7 +33,7 @@ public class GielinorTravelsPanel extends PluginPanel
         label.setForeground(Color.LIGHT_GRAY);
         label.setHorizontalAlignment(SwingConstants.CENTER);
 
-        BufferedImage locationImg = ImageUtil.loadImageResource(GielinorTravelsPlugin.class, "/locations/1/1.png");
+        BufferedImage locationImg = ImageUtil.loadImageResource(GielinorTravelsPlugin.class, "/join.png");
         JPanel picPanel = new JPanel();
         picPanel.setBorder(new EmptyBorder(0,0,0,0));
         picPanel.setLayout(new GridLayout(1, 1, 5, 5));
@@ -62,12 +65,16 @@ public class GielinorTravelsPanel extends PluginPanel
     }
 
     private void onStartButtonClicked(ActionEvent e){
-        LocationLoader location = new LocationLoader();
-        setScaledImage(location.getLocationImg());
-        plugin.setDestination(location.getDestination());
-        plugin.changeOverlayImage(location.getLocationImg());
-        plugin.showOverlay();
+        setScaledImage(ImageUtil.loadImageResource(GielinorTravelsPlugin.class,"/waiting.png"));
+        location = new LocationLoader(plugin);
+        inQueue = true;
+//        setScaledImage(location.getLocationImg());
+//        plugin.setDestination(location.getDestination());
+//        plugin.changeOverlayImage(location.getLocationImg());
+//        plugin.showOverlay();
     }
+
+    public boolean isInQueue(){ return inQueue; }
 
     private void setScaledImage(BufferedImage locationImg){
         // Sidebar width is ~200px depending on RuneLite scaling,
@@ -85,6 +92,15 @@ public class GielinorTravelsPanel extends PluginPanel
 
         picLabel.revalidate();
         picLabel.repaint();
+    }
+
+    public void onTenMinute(){
+        location.loadFromServer();
+        setScaledImage(location.getLocationImg());
+        plugin.setDestination(location.getDestination());
+        plugin.changeOverlayImage(location.getLocationImg());
+        plugin.showOverlay();
+        inQueue = false;
     }
 
 }

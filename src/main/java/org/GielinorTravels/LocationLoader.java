@@ -1,11 +1,9 @@
 package org.GielinorTravels;
 
+import lombok.SneakyThrows;
 import net.runelite.api.coords.WorldPoint;
-import net.runelite.client.util.ImageUtil;
 
 import java.awt.image.BufferedImage;
-import java.io.BufferedReader;
-import java.io.FileReader;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -13,58 +11,44 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
-import java.util.Random;
 
 public class LocationLoader {
 
-    private final BufferedImage locationImg;
+    private BufferedImage locationImg;
 
-    private final WorldPoint destination;
+    private WorldPoint destination;
 
-    public LocationLoader(){
-        Random rand = new Random();
-        int maxNum = countFiles();
-        int locationNum = rand.nextInt(maxNum)+1;
-        String path = ("/locations/"+locationNum);
+    private final SSEImageClient imageClient = new SSEImageClient();
 
-        this.locationImg = ImageUtil.loadImageResource(GielinorTravelsPlugin.class, path+"/1.png");
 
-        int[] coords = readWorldPointCSV("src/main/resources"+path);
-        this.destination = new WorldPoint(coords[0],coords[1],coords[2]);
+    @SneakyThrows
+    public LocationLoader(GielinorTravelsPlugin plugin){
+        //join the queue and wait for image and csv
+        long userID = plugin.client.getAccountHash();
+        imageClient.joinQueue(userID+"");
+        imageClient.listenForImageEvents(userID+"");
     }
 
     public BufferedImage getLocationImg() { return locationImg; }
     public WorldPoint getDestination() { return destination; }
 
-    private int countFiles(){
-        Path dir = Paths.get("src/main/resources/locations");
 
-        try (Stream<Path> files = Files.list(dir)) {
-            return Math.toIntExact(files.filter(Files::isDirectory).count());
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return -1;
-    }
-
-    private int[] readWorldPointCSV(String path){
+    private int[] readWorldPointCSV(String line) {
         List<Integer> numbers = new ArrayList<>();
-        try (BufferedReader br = new BufferedReader(new FileReader(path+"/1.csv"))) {
-            String line;
+        String[] values = line.split(",");
 
-            while ((line = br.readLine()) != null) {
-                // Split line by commas
-                String[] values = line.split(",");
-
-                // Parse each value as int and add to the list
-                for (String value : values) {
-                    numbers.add(Integer.parseInt(value.trim()));
-                }
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
+        // Parse each value as int and add to the list
+        for (String value : values) {
+            numbers.add(Integer.parseInt(value.trim()));
         }
         // Convert List<Integer> to int[]
         return numbers.stream().mapToInt(Integer::intValue).toArray();
+    }
+
+    public void loadFromServer(){
+        this.locationImg = imageClient.getDownloadedImage();
+        String csvLine = imageClient.getDownloadedCsv();
+        int[] coords = readWorldPointCSV(csvLine);
+        this.destination = new WorldPoint(coords[0],coords[1],coords[2]);
     }
 }

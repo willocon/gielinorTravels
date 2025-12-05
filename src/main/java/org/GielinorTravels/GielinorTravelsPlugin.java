@@ -18,6 +18,7 @@ import net.runelite.client.ui.overlay.OverlayManager;
 import net.runelite.client.util.ImageUtil;
 
 import java.awt.image.BufferedImage;
+import java.time.LocalTime;
 
 @Slf4j
 @PluginDescriptor(
@@ -26,7 +27,7 @@ import java.awt.image.BufferedImage;
 public class GielinorTravelsPlugin extends Plugin
 {
 	@Inject
-	private Client client;
+    Client client;
 
     @Inject
     private ClientThread clientThread;
@@ -109,9 +110,16 @@ public class GielinorTravelsPlugin extends Plugin
                 isFound=false;
             }
         }
+        if (panel.isInQueue()) {
+            LocalTime now = LocalTime.now();
+            if (now.getMinute()%10 == 0 && now.getSecond() == 1) {
+                panel.onTenMinute();
+            }
+        }
 	}
 
-    public void showLocation() {
+    public void showLocation()
+    {
         clientThread.invoke(() -> {
             if (client.getLocalPlayer() == null) {
                 return;
@@ -123,8 +131,14 @@ public class GielinorTravelsPlugin extends Plugin
         });
     }
 
-    public void setDestination(WorldPoint newDestination){
+    public void setDestination(WorldPoint newDestination)
+    {
         destination = newDestination;
+    }
+
+    public WorldPoint getDestination()
+    {
+        return destination;
     }
 
     public void showOverlay()
@@ -138,7 +152,8 @@ public class GielinorTravelsPlugin extends Plugin
         return showOverlayImage;
     }
 
-    public void changeOverlayImage(BufferedImage newImg){
+    public void changeOverlayImage(BufferedImage newImg)
+    {
         overlay.setOverlayImage(newImg);
     }
 

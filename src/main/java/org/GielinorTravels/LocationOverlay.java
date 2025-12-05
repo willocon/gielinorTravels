@@ -1,9 +1,14 @@
 package org.GielinorTravels;
 
+import net.runelite.api.Perspective;
+import net.runelite.api.Tile;
+import net.runelite.api.WorldView;
+import net.runelite.api.coords.LocalPoint;
+import net.runelite.api.coords.WorldPoint;
 import net.runelite.client.ui.overlay.Overlay;
 import net.runelite.client.ui.overlay.OverlayPosition;
 import net.runelite.client.ui.overlay.OverlayLayer;
-import net.runelite.client.util.ImageUtil;
+import net.runelite.client.ui.overlay.OverlayUtil;
 
 import javax.inject.Inject;
 import java.awt.*;
@@ -18,14 +23,15 @@ public class LocationOverlay extends Overlay {
     public LocationOverlay(GielinorTravelsPlugin plugin)
     {
         this.plugin = plugin;
-        setPosition(OverlayPosition.TOP_LEFT); // or DYNAMIC, ABOVE_WIDGETS, etc.
+        setPosition(OverlayPosition.DYNAMIC);
         setLayer(OverlayLayer.ABOVE_WIDGETS);
 
-        BufferedImage raw = ImageUtil.loadImageResource(GielinorTravelsPlugin.class, "/locations/1/1.png");
-        setOverlayImage(raw);
+//        BufferedImage raw = ImageUtil.loadImageResource(GielinorTravelsPlugin.class, "/locations/1/screenshot.png");
+//        setOverlayImage(raw);
     }
 
-    public void setOverlayImage(BufferedImage newImg){
+    public void setOverlayImage(BufferedImage newImg)
+    {
         image = scaleImage(newImg, 500, 500);
     }
 
@@ -42,6 +48,13 @@ public class LocationOverlay extends Overlay {
     @Override
     public Dimension render(Graphics2D g)
     {
+        WorldView wv = plugin.client.getLocalPlayer().getWorldView();
+        WorldPoint dest = plugin.getDestination();
+        if (wv.contains(dest)) {
+            Tile tile = wv.getScene().getTiles()[dest.getPlane()][dest.getX() - wv.getBaseX()][dest.getY() - wv.getBaseY()];
+            renderDestTile(g, tile.getLocalLocation());
+        }
+
         if (!plugin.isOverlayVisible() || image == null)
             return null;
 
@@ -57,6 +70,20 @@ public class LocationOverlay extends Overlay {
         g.setStroke(new BasicStroke(2));
         g.drawRoundRect(x - 4, y - 4, image.getWidth() + 8, image.getHeight() + 8, 12, 12);
 
-        return new Dimension(image.getWidth(), image.getHeight());
+        return null;
+//        return new Dimension(image.getWidth(), image.getHeight());
+    }
+
+    private void renderDestTile(final Graphics2D graphics, final LocalPoint destPoint)
+    {
+        if (destPoint == null) {
+            return;
+        }
+
+        final Polygon poly = Perspective.getCanvasTilePoly(plugin.client, destPoint);
+        if (poly == null) {
+            return;
+        }
+        OverlayUtil.renderPolygon(graphics, poly, Color.YELLOW);
     }
 }
