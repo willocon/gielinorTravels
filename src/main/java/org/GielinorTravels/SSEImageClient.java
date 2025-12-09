@@ -46,6 +46,25 @@ public class SSEImageClient {
         }
     }
 
+    // Sends POST /completed
+    public void SendCompleted(String userId, long ticks, String username) throws Exception {
+        String json = "{\"user_id\":\"" + userId + "\" , \"ticks\":\"" + ticks + "\", \"username\":\"" + username + "\"}";
+
+        RequestBody body = RequestBody.create(
+                MediaType.parse("application/json"), json
+        );
+
+        Request request = new Request.Builder()
+                .url(BASE_URL + "/completed")
+                .post(body)
+                .build();
+
+        try (Response response = client.newCall(request).execute()) {
+            assert response.body() != null;
+            System.out.println("Completed: " + response.body().string());
+        }
+    }
+
     // Opens SSE event stream
     public void listenForImageEvents(String userId) {
         Request request = new Request.Builder()

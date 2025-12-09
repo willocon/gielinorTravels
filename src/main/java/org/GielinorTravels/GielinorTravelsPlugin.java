@@ -99,6 +99,16 @@ public class GielinorTravelsPlugin extends Plugin
             if (playerPos.equals(destination)) {
                 client.addChatMessage(ChatMessageType.GAMEMESSAGE, "", "Reached destination Tile!: " + playerPos + " in " + timerTicks + " ticks!", null);
                 isFound = true;
+                // send some sort of packet to the server notifying its been found
+                try {
+                    panel.panelSendCompleted(
+                            client.getAccountHash() + "",
+                            timerTicks,
+                            client.getLocalPlayer().getName()
+                    );
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
             }
         }
         timerTicks++;

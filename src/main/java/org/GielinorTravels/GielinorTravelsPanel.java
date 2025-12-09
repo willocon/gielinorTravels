@@ -111,4 +111,16 @@ public class GielinorTravelsPanel extends PluginPanel
         inQueue = false;
     }
 
+    public void panelSendCompleted(String userid,long timerTicks, String playerName) {
+        try {
+            location.imageClient.SendCompleted(
+                    userid,
+                    timerTicks,
+                    playerName
+            );
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
 }
