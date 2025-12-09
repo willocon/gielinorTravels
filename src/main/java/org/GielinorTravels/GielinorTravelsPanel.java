@@ -68,6 +68,7 @@ public class GielinorTravelsPanel extends PluginPanel
         setScaledImage(ImageUtil.loadImageResource(GielinorTravelsPlugin.class,"/waiting.png"));
         location = new LocationLoader(plugin);
         inQueue = true;
+        onTenMinute();
 //        setScaledImage(location.getLocationImg());
 //        plugin.setDestination(location.getDestination());
 //        plugin.changeOverlayImage(location.getLocationImg());
@@ -95,6 +96,13 @@ public class GielinorTravelsPanel extends PluginPanel
     }
 
     public void onTenMinute(){
+        while (!location.imageClient.getEventHandled()) {
+            try {
+                Thread.sleep(100);
+            } catch (InterruptedException ex) {
+                throw new RuntimeException(ex);
+            }
+        }
         location.loadFromServer();
         setScaledImage(location.getLocationImg());
         plugin.setDestination(location.getDestination());

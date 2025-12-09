@@ -60,7 +60,7 @@ public class GielinorTravelsPlugin extends Plugin
 
 
     @Override
-	protected void startUp() throws Exception
+	protected void startUp()
 	{
         overlayManager.add(overlay);
 
@@ -139,6 +139,11 @@ public class GielinorTravelsPlugin extends Plugin
     public WorldPoint getDestination()
     {
         return destination;
+    }
+
+    public boolean getIsFound()
+    {
+        return isFound;
     }
 
     public void showOverlay()

@@ -4,13 +4,8 @@ import lombok.SneakyThrows;
 import net.runelite.api.coords.WorldPoint;
 
 import java.awt.image.BufferedImage;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Stream;
 
 public class LocationLoader {
 
@@ -18,7 +13,7 @@ public class LocationLoader {
 
     private WorldPoint destination;
 
-    private final SSEImageClient imageClient = new SSEImageClient();
+    public final SSEImageClient imageClient = new SSEImageClient();
 
 
     @SneakyThrows

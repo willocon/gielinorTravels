@@ -50,10 +50,11 @@ public class LocationOverlay extends Overlay {
     {
         WorldView wv = plugin.client.getLocalPlayer().getWorldView();
         WorldPoint dest = plugin.getDestination();
-        if (wv.contains(dest)) {
-            Tile tile = wv.getScene().getTiles()[dest.getPlane()][dest.getX() - wv.getBaseX()][dest.getY() - wv.getBaseY()];
-            renderDestTile(g, tile.getLocalLocation());
-        }
+        if(!plugin.getIsFound())
+            if (wv.contains(dest)) {
+                Tile tile = wv.getScene().getTiles()[dest.getPlane()][dest.getX() - wv.getBaseX()][dest.getY() - wv.getBaseY()];
+                renderDestTile(g, tile.getLocalLocation());
+            }
 
         if (!plugin.isOverlayVisible() || image == null)
             return null;

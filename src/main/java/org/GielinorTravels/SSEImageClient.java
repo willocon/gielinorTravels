@@ -83,6 +83,7 @@ public class SSEImageClient {
         });
     }
 
+    public static boolean eventHandled = false;
     // Handles incoming SSE JSON event using Gson
     private static void handleEvent(String json) {
         try {
@@ -105,9 +106,15 @@ public class SSEImageClient {
             downloadedCsv = loadCsv(csvUrl);
             System.out.println("Loaded csv data: " + downloadedCsv);
 
+            eventHandled = true;
+
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    public boolean getEventHandled() {
+        return eventHandled;
     }
 
 
@@ -131,6 +138,10 @@ public class SSEImageClient {
 
     public BufferedImage getDownloadedImage() { return downloadedImage; }
 
-    public String getDownloadedCsv() { return downloadedCsv; }
+    public String getDownloadedCsv()
+    {
+        eventHandled = false;
+        return downloadedCsv;
+    }
 
 }
