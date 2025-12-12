@@ -66,9 +66,8 @@ public class GielinorTravelsPanel extends PluginPanel
 
     private void onStartButtonClicked(ActionEvent e){
         setScaledImage(ImageUtil.loadImageResource(GielinorTravelsPlugin.class,"/waiting.png"));
-        location = new LocationLoader(plugin);
+        location = new LocationLoader(plugin, this);
         inQueue = true;
-        onTenMinute();
 
         buttonPanel.removeAll();
         buttonPanel.add(showButton);
@@ -95,8 +94,8 @@ public class GielinorTravelsPanel extends PluginPanel
     public boolean isInQueue(){ return inQueue; }
 
     private void setScaledImage(BufferedImage locationImg){
-        // Sidebar width is ~200px depending on RuneLite scaling,
-        // so we resize to fit the panel width while keeping aspect ratio.
+        // Sidebar width is ~220px depending on RuneLite scaling,
+        // so resize to fit the panel width while keeping aspect ratio.
         int panelWidth = 220;
         int imgWidth = locationImg.getWidth();
         int imgHeight = locationImg.getHeight();
@@ -113,13 +112,6 @@ public class GielinorTravelsPanel extends PluginPanel
     }
 
     public void onTenMinute(){
-        while (!location.imageClient.getEventHandled()) {
-            try {
-                Thread.sleep(100);
-            } catch (InterruptedException ex) {
-                throw new RuntimeException(ex);
-            }
-        }
         location.loadFromServer();
         setScaledImage(location.getLocationImg());
         plugin.setDestination(location.getDestination());

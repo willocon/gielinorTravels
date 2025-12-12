@@ -18,7 +18,6 @@ import net.runelite.client.ui.overlay.OverlayManager;
 import net.runelite.client.util.ImageUtil;
 
 import java.awt.image.BufferedImage;
-import java.time.LocalTime;
 
 @Slf4j
 @PluginDescriptor(
@@ -57,7 +56,6 @@ public class GielinorTravelsPlugin extends Plugin
     private int timerTicks;
     private boolean isFound = false;
 
-    private int eventTicks = 0;
 
 
     @Override
@@ -101,7 +99,7 @@ public class GielinorTravelsPlugin extends Plugin
             if (playerPos.equals(destination)) {
                 client.addChatMessage(ChatMessageType.GAMEMESSAGE, "", "Reached destination Tile!: " + playerPos + " in " + timerTicks + " ticks!", null);
                 isFound = true;
-                // send some sort of packet to the server notifying its been found
+                // send some sort of packet to the server notifying it's been found
                 try {
                     panel.panelSendCompleted(
                             client.getAccountHash() + "",
@@ -120,16 +118,6 @@ public class GielinorTravelsPlugin extends Plugin
                 showOverlayImage = false;
                 timerTicks = 0;
                 isFound=false;
-            }
-        }
-        if (panel.isInQueue()) {
-            LocalTime now = LocalTime.now();
-            if (eventTicks == 0 && now.getMinute()%10 == 0 && now.getSecond() == 1) {
-                panel.onTenMinute();
-                eventTicks++;
-            }
-            if (now.getSecond() != 1) {
-                eventTicks = 0;
             }
         }
 	}

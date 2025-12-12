@@ -26,8 +26,6 @@ public class LocationOverlay extends Overlay {
         setPosition(OverlayPosition.DYNAMIC);
         setLayer(OverlayLayer.ABOVE_WIDGETS);
 
-//        BufferedImage raw = ImageUtil.loadImageResource(GielinorTravelsPlugin.class, "/locations/1/screenshot.png");
-//        setOverlayImage(raw);
     }
 
     public void setOverlayImage(BufferedImage newImg)
@@ -72,7 +70,6 @@ public class LocationOverlay extends Overlay {
         g.drawRoundRect(x - 4, y - 4, image.getWidth() + 8, image.getHeight() + 8, 12, 12);
 
         return null;
-//        return new Dimension(image.getWidth(), image.getHeight());
     }
 
     private void renderDestTile(final Graphics2D graphics, final LocalPoint destPoint)

@@ -17,11 +17,11 @@ public class LocationLoader {
 
 
     @SneakyThrows
-    public LocationLoader(GielinorTravelsPlugin plugin){
+    public LocationLoader(GielinorTravelsPlugin plugin, GielinorTravelsPanel panel){
         //join the queue and wait for image and csv
         long userID = plugin.client.getAccountHash();
         imageClient.joinQueue(userID+"");
-        imageClient.listenForImageEvents(userID+"");
+        imageClient.listenForImageEvents(userID+"",panel);
     }
 
     public BufferedImage getLocationImg() { return locationImg; }
@@ -43,7 +43,6 @@ public class LocationLoader {
     public void loadFromServer(){
         this.locationImg = imageClient.getDownloadedImage();
         String csvLine = imageClient.getDownloadedCsv();
-        imageClient.handledEvent();
         int[] coords = readWorldPointCSV(csvLine);
         this.destination = new WorldPoint(coords[0],coords[1],coords[2]);
     }

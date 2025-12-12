@@ -27,8 +27,6 @@ public class SSEImageClient {
     private static BufferedImage downloadedImage;
     private static String downloadedCsv;
 
-    public boolean eventHandled = false;
-
     // Sends POST /join
     public void joinQueue(String userId) throws Exception {
         String json = "{\"user_id\":\"" + userId + "\"}";
@@ -87,7 +85,7 @@ public class SSEImageClient {
     }
 
     // Opens SSE event stream
-    public void listenForImageEvents(String userId) {
+    public void listenForImageEvents(String userId, GielinorTravelsPanel panel) {
         Request request = new Request.Builder()
                 .url(BASE_URL + "/events?user_id=" + userId)
                 .get()
@@ -117,7 +115,7 @@ public class SSEImageClient {
                         System.out.println("Received SSE: " + json);
 
                         handleEvent(json);
-                        System.out.println("Event ha: "+ eventHandled);
+                        panel.onTenMinute();
                     }
                 }
             }
@@ -146,17 +144,12 @@ public class SSEImageClient {
             downloadedCsv = loadCsv(csvUrl);
             System.out.println("Loaded csv data: " + downloadedCsv);
 
-            eventHandled = true;
-            System.out.println("eventHandled set to true: " + eventHandled);
 
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
-    public boolean getEventHandled() {
-        return eventHandled;
-    }
 
 
     // Downloads image from URL
@@ -184,9 +177,5 @@ public class SSEImageClient {
         return downloadedCsv;
     }
 
-    public void handledEvent()
-    {
-        eventHandled = false;
-    }
 
 }
