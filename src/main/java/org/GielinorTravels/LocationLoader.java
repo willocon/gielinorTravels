@@ -43,6 +43,7 @@ public class LocationLoader {
     public void loadFromServer(){
         this.locationImg = imageClient.getDownloadedImage();
         String csvLine = imageClient.getDownloadedCsv();
+        imageClient.handledEvent();
         int[] coords = readWorldPointCSV(csvLine);
         this.destination = new WorldPoint(coords[0],coords[1],coords[2]);
     }

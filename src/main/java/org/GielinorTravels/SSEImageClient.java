@@ -14,10 +14,10 @@ import java.nio.charset.StandardCharsets;
 public class SSEImageClient {
 
     private static final OkHttpClient client = new OkHttpClient.Builder()
-            .connectTimeout(11, java.util.concurrent.TimeUnit.MINUTES)
-            .readTimeout(11, java.util.concurrent.TimeUnit.MINUTES)
-            .writeTimeout(11, java.util.concurrent.TimeUnit.MINUTES)
-            .callTimeout(11, java.util.concurrent.TimeUnit.MINUTES)
+            .connectTimeout(0, java.util.concurrent.TimeUnit.MINUTES)
+            .readTimeout(0, java.util.concurrent.TimeUnit.MINUTES)
+            .writeTimeout(0, java.util.concurrent.TimeUnit.MINUTES)
+            .callTimeout(0, java.util.concurrent.TimeUnit.MINUTES)
             .build();
     private static final Gson gson = new Gson();
 
@@ -26,6 +26,8 @@ public class SSEImageClient {
 
     private static BufferedImage downloadedImage;
     private static String downloadedCsv;
+
+    public boolean eventHandled = false;
 
     // Sends POST /join
     public void joinQueue(String userId) throws Exception {
@@ -43,6 +45,25 @@ public class SSEImageClient {
         try (Response response = client.newCall(request).execute()) {
             assert response.body() != null;
             System.out.println("Joined: " + response.body().string());
+        }
+    }
+
+    //Sends POST /leave
+    public void leaveQueue(String userId) throws Exception {
+        String json = "{\"user_id\":\"" + userId + "\"}";
+
+        RequestBody body = RequestBody.create(
+                MediaType.parse("application/json"), json
+        );
+
+        Request request = new Request.Builder()
+                .url(BASE_URL + "/leave")
+                .post(body)
+                .build();
+
+        try (Response response = client.newCall(request).execute()) {
+            assert response.body() != null;
+            System.out.println("Left: " + response.body().string());
         }
     }
 
@@ -96,15 +117,15 @@ public class SSEImageClient {
                         System.out.println("Received SSE: " + json);
 
                         handleEvent(json);
+                        System.out.println("Event ha: "+ eventHandled);
                     }
                 }
             }
         });
     }
 
-    public static boolean eventHandled = false;
     // Handles incoming SSE JSON event using Gson
-    private static void handleEvent(String json) {
+    private void handleEvent(String json) {
         try {
             JsonObject obj = gson.fromJson(json, JsonObject.class);
 
@@ -126,6 +147,7 @@ public class SSEImageClient {
             System.out.println("Loaded csv data: " + downloadedCsv);
 
             eventHandled = true;
+            System.out.println("eventHandled set to true: " + eventHandled);
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -159,8 +181,12 @@ public class SSEImageClient {
 
     public String getDownloadedCsv()
     {
-        eventHandled = false;
         return downloadedCsv;
+    }
+
+    public void handledEvent()
+    {
+        eventHandled = false;
     }
 
 }

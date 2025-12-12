@@ -50,7 +50,7 @@ public class LocationOverlay extends Overlay {
     {
         WorldView wv = plugin.client.getLocalPlayer().getWorldView();
         WorldPoint dest = plugin.getDestination();
-        if(!plugin.getIsFound())
+        if(!plugin.getIsFound()&& plugin.panel.isInQueue())
             if (wv.contains(dest)) {
                 Tile tile = wv.getScene().getTiles()[dest.getPlane()][dest.getX() - wv.getBaseX()][dest.getY() - wv.getBaseY()];
                 renderDestTile(g, tile.getLocalLocation());

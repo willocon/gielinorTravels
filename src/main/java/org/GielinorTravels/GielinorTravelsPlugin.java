@@ -45,18 +45,19 @@ public class GielinorTravelsPlugin extends Plugin
     private LocationOverlay overlay;
 
     private NavigationButton navButton;
-    private GielinorTravelsPanel panel;
+    public GielinorTravelsPanel panel;
 
     private WorldPoint destination;
 
     //Overlay logic
     private boolean showOverlayImage = false;
-    private int ticksRemaining = 0;
-    private final int TOTAL_TICKS = 10;
+    private int ticksRemaining;
 
     //timing logic
     private int timerTicks;
     private boolean isFound = false;
+
+    private int eventTicks = 0;
 
 
     @Override
@@ -87,6 +88,7 @@ public class GielinorTravelsPlugin extends Plugin
 	{
         overlayManager.remove(overlay);
         clientToolbar.removeNavigation(navButton);
+        panel.leaveQueue();
         panel = null;
         log.info("Example stopped!");
 	}
@@ -122,8 +124,12 @@ public class GielinorTravelsPlugin extends Plugin
         }
         if (panel.isInQueue()) {
             LocalTime now = LocalTime.now();
-            if (now.getMinute()%10 == 0 && now.getSecond() == 1) {
+            if (eventTicks == 0 && now.getMinute()%10 == 0 && now.getSecond() == 1) {
                 panel.onTenMinute();
+                eventTicks++;
+            }
+            if (now.getSecond() != 1) {
+                eventTicks = 0;
             }
         }
 	}
@@ -159,7 +165,7 @@ public class GielinorTravelsPlugin extends Plugin
     public void showOverlay()
     {
         showOverlayImage = true;
-        ticksRemaining = TOTAL_TICKS;
+        ticksRemaining = 10;
     }
 
     public boolean isOverlayVisible()

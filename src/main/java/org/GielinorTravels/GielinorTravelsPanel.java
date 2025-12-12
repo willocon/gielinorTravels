@@ -20,6 +20,7 @@ public class GielinorTravelsPanel extends PluginPanel
     private final JButton showButton = new JButton("Show Location");
     private final JButton startButton = new JButton("Join Lobby");
     private final JLabel picLabel = new JLabel();
+    private final JPanel buttonPanel = new JPanel();
 
 
     public GielinorTravelsPanel(GielinorTravelsPlugin plugin, GielinorTravelsConfig config){
@@ -29,7 +30,7 @@ public class GielinorTravelsPanel extends PluginPanel
         setLayout(new BorderLayout(0, 10));
         setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
-        JLabel label = new JLabel("Developer Tools");
+        JLabel label = new JLabel("Gielinor Travels");
         label.setForeground(Color.LIGHT_GRAY);
         label.setHorizontalAlignment(SwingConstants.CENTER);
 
@@ -44,7 +45,6 @@ public class GielinorTravelsPanel extends PluginPanel
 
         picPanel.add(picLabel,BorderLayout.NORTH);
 
-        JPanel buttonPanel = new JPanel();
         buttonPanel.setBorder(new EmptyBorder(0,0,0,0));
         buttonPanel.setLayout(new GridLayout(2,1,5,5));
 
@@ -69,10 +69,27 @@ public class GielinorTravelsPanel extends PluginPanel
         location = new LocationLoader(plugin);
         inQueue = true;
         onTenMinute();
-//        setScaledImage(location.getLocationImg());
-//        plugin.setDestination(location.getDestination());
-//        plugin.changeOverlayImage(location.getLocationImg());
-//        plugin.showOverlay();
+
+        buttonPanel.removeAll();
+        buttonPanel.add(showButton);
+        JButton stopButton = new JButton("Leave Lobby");
+        stopButton.addActionListener(this::onStopButtonClicked);
+
+        buttonPanel.add(stopButton);
+        buttonPanel.revalidate();
+        buttonPanel.repaint();
+    }
+
+    private void onStopButtonClicked(ActionEvent e){
+        leaveQueue();
+        setScaledImage(ImageUtil.loadImageResource(GielinorTravelsPlugin.class,"/join.png"));
+        buttonPanel.removeAll();
+        buttonPanel.add(showButton);
+        buttonPanel.add(startButton);
+        buttonPanel.revalidate();
+        buttonPanel.repaint();
+
+        plugin.setDestination(null);
     }
 
     public boolean isInQueue(){ return inQueue; }
@@ -80,7 +97,7 @@ public class GielinorTravelsPanel extends PluginPanel
     private void setScaledImage(BufferedImage locationImg){
         // Sidebar width is ~200px depending on RuneLite scaling,
         // so we resize to fit the panel width while keeping aspect ratio.
-        int panelWidth = Math.max(220, getWidth());
+        int panelWidth = 220;
         int imgWidth = locationImg.getWidth();
         int imgHeight = locationImg.getHeight();
         double scale = (double) panelWidth / imgWidth;
@@ -108,7 +125,6 @@ public class GielinorTravelsPanel extends PluginPanel
         plugin.setDestination(location.getDestination());
         plugin.changeOverlayImage(location.getLocationImg());
         plugin.showOverlay();
-        inQueue = false;
     }
 
     public void panelSendCompleted(String userid,long timerTicks, String playerName) {
@@ -120,6 +136,17 @@ public class GielinorTravelsPanel extends PluginPanel
             );
         } catch (Exception e) {
             throw new RuntimeException(e);
+        }
+        setScaledImage(ImageUtil.loadImageResource(GielinorTravelsPlugin.class,"/waiting.png"));
+    }
+
+    public void leaveQueue() {
+        inQueue = false;
+        try {
+            long userID = plugin.client.getAccountHash();
+            location.imageClient.leaveQueue(userID+"");
+        } catch (Exception ex) {
+            throw new RuntimeException(ex);
         }
     }
 
