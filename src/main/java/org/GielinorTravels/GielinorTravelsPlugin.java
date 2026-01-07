@@ -103,7 +103,6 @@ public class GielinorTravelsPlugin extends Plugin
                 try {
                     panel.panelSendCompleted(
                             client.getAccountHash() + "",
-                            timerTicks,
                             client.getLocalPlayer().getName()
                     );
                 } catch (Exception e) {

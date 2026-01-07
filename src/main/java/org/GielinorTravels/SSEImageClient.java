@@ -27,6 +27,8 @@ public class SSEImageClient {
     private static BufferedImage downloadedImage;
     private static String downloadedCsv;
 
+    private boolean completedSent = false;
+
     // Sends POST /join
     public void joinQueue(String userId) throws Exception {
         String json = "{\"user_id\":\"" + userId + "\"}";
@@ -66,8 +68,8 @@ public class SSEImageClient {
     }
 
     // Sends POST /completed
-    public void SendCompleted(String userId, long ticks, String username) throws Exception {
-        String json = "{\"user_id\":\"" + userId + "\" , \"ticks\":\"" + ticks + "\", \"username\":\"" + username + "\"}";
+    public void SendCompleted(String userId, String username) throws Exception {
+        String json = "{\"user_id\":\"" + userId + "\" , \"username\":\"" + username + "\"}";
 
         RequestBody body = RequestBody.create(
                 MediaType.parse("application/json"), json

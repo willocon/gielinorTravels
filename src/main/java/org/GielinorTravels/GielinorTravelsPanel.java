@@ -119,11 +119,10 @@ public class GielinorTravelsPanel extends PluginPanel
         plugin.showOverlay();
     }
 
-    public void panelSendCompleted(String userid,long timerTicks, String playerName) {
+    public void panelSendCompleted(String userid, String playerName) {
         try {
             location.imageClient.SendCompleted(
                     userid,
-                    timerTicks,
                     playerName
             );
         } catch (Exception e) {
