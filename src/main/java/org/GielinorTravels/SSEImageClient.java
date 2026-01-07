@@ -27,8 +27,6 @@ public class SSEImageClient {
     private static BufferedImage downloadedImage;
     private static String downloadedCsv;
 
-    private boolean completedSent = false;
-
     // Sends POST /join
     public void joinQueue(String userId) throws Exception {
         String json = "{\"user_id\":\"" + userId + "\"}";
