@@ -97,13 +97,14 @@ public class GielinorTravelsPlugin extends Plugin
         final WorldPoint playerPos = client.getLocalPlayer().getWorldLocation();
         if (!isFound) {
             if (playerPos.equals(destination)) {
-                client.addChatMessage(ChatMessageType.GAMEMESSAGE, "", "Reached destination Tile!: " + playerPos + " in " + timerTicks + " ticks!", null);
+                //client.addChatMessage(ChatMessageType.GAMEMESSAGE, "", "Reached destination Tile!: " + playerPos + " in " + timerTicks + " ticks!", null);
                 isFound = true;
                 // send some sort of packet to the server notifying it's been found
                 try {
                     panel.panelSendCompleted(
                             client.getAccountHash() + "",
-                            client.getLocalPlayer().getName()
+                            client.getLocalPlayer().getName(),
+                            this
                     );
                 } catch (Exception e) {
                     throw new RuntimeException(e);
@@ -120,6 +121,11 @@ public class GielinorTravelsPlugin extends Plugin
             }
         }
 	}
+
+    public void displayScore(String score)
+    {
+        clientThread.invoke(() -> client.addChatMessage(ChatMessageType.GAMEMESSAGE, "", "You reached the destination! You got " + score + " points!", null));
+    }
 
     public void showLocation()
     {

@@ -21,8 +21,8 @@ public class SSEImageClient {
             .build();
     private static final Gson gson = new Gson();
 
-    // CHANGE THIS TO SERVER
-    private static final String BASE_URL = "http://127.0.0.1:5000";
+    // CHANGE THIS TO SERVER: https://gielinortravels.containers.uwcs.co.uk
+    private static final String BASE_URL = "https://gielinortravels.containers.uwcs.co.uk";
 
     private static BufferedImage downloadedImage;
     private static String downloadedCsv;
@@ -66,7 +66,7 @@ public class SSEImageClient {
     }
 
     // Sends POST /completed
-    public void SendCompleted(String userId, String username) throws Exception {
+    public void SendCompleted(String userId, String username, GielinorTravelsPlugin plugin) throws Exception {
         String json = "{\"user_id\":\"" + userId + "\" , \"username\":\"" + username + "\"}";
 
         RequestBody body = RequestBody.create(
@@ -80,7 +80,18 @@ public class SSEImageClient {
 
         try (Response response = client.newCall(request).execute()) {
             assert response.body() != null;
-            System.out.println("Completed: " + response.body().string());
+            String responseJson = response.body().string();
+            System.out.println("Completed: " + responseJson);
+            JsonObject obj = gson.fromJson(responseJson, JsonObject.class);
+
+            if(!obj.has("score")) {
+                System.out.println("No score in response, user already completed");
+                return;
+            }
+            String score = obj.get("score").getAsString();
+            System.out.println("Score received: " + score);
+            plugin.displayScore(score);
+
         }
     }
 

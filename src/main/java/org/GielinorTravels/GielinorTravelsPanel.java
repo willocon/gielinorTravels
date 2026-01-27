@@ -21,6 +21,7 @@ public class GielinorTravelsPanel extends PluginPanel
     private final JButton startButton = new JButton("Join Lobby");
     private final JLabel picLabel = new JLabel();
     private final JPanel buttonPanel = new JPanel();
+    //private final JPanel textPanel = new JPanel();
 
 
     public GielinorTravelsPanel(GielinorTravelsPlugin plugin, GielinorTravelsConfig config){
@@ -34,25 +35,30 @@ public class GielinorTravelsPanel extends PluginPanel
         label.setForeground(Color.LIGHT_GRAY);
         label.setHorizontalAlignment(SwingConstants.CENTER);
 
-        BufferedImage locationImg = ImageUtil.loadImageResource(GielinorTravelsPlugin.class, "/join.png");
+//        BufferedImage locationImg = ImageUtil.loadImageResource(GielinorTravelsPlugin.class, "/join.png");
         JPanel picPanel = new JPanel();
         picPanel.setBorder(new EmptyBorder(0,0,0,0));
         picPanel.setLayout(new GridLayout(1, 1, 5, 5));
 
-        // Sidebar width is ~200px depending on RuneLite scaling,
+        // Sidebar width is ~220px depending on RuneLite scaling,
         // so we resize to fit the panel width while keeping aspect ratio.
-        setScaledImage(locationImg);
+//        setScaledImage(locationImg);
 
         picPanel.add(picLabel,BorderLayout.NORTH);
+
+        JLabel infoLabel = new JLabel("<html>Join a lobby to be matched with a random location in Gielinor.<br>" +
+                "Every 10 minutes, your destination will update to a new location!</html>");
+        infoLabel.setForeground(Color.LIGHT_GRAY);
 
         buttonPanel.setBorder(new EmptyBorder(0,0,0,0));
         buttonPanel.setLayout(new GridLayout(2,1,5,5));
 
 
-        showButton.addActionListener(this::onShowButtonClicked);
+        //showButton.addActionListener(this::onShowButtonClicked);
         startButton.addActionListener(this::onStartButtonClicked);
 
-        buttonPanel.add(showButton);
+        //buttonPanel.add(showButton);
+        buttonPanel.add(infoLabel);
         buttonPanel.add(startButton);
 
         add(label, BorderLayout.NORTH);
@@ -65,15 +71,20 @@ public class GielinorTravelsPanel extends PluginPanel
     }
 
     private void onStartButtonClicked(ActionEvent e){
-        setScaledImage(ImageUtil.loadImageResource(GielinorTravelsPlugin.class,"/waiting.png"));
+//        setScaledImage(ImageUtil.loadImageResource(GielinorTravelsPlugin.class,"/waiting.png"));
         location = new LocationLoader(plugin, this);
         inQueue = true;
 
+
+        JLabel waitLabel = new JLabel("<html>Waiting for server to send destination.</html>");
+        waitLabel.setForeground(Color.LIGHT_GRAY);
+
         buttonPanel.removeAll();
-        buttonPanel.add(showButton);
+        //buttonPanel.add(showButton);
         JButton stopButton = new JButton("Leave Lobby");
         stopButton.addActionListener(this::onStopButtonClicked);
 
+        buttonPanel.add(waitLabel);
         buttonPanel.add(stopButton);
         buttonPanel.revalidate();
         buttonPanel.repaint();
@@ -81,9 +92,17 @@ public class GielinorTravelsPanel extends PluginPanel
 
     private void onStopButtonClicked(ActionEvent e){
         leaveQueue();
-        setScaledImage(ImageUtil.loadImageResource(GielinorTravelsPlugin.class,"/join.png"));
+        //setScaledImage(ImageUtil.loadImageResource(GielinorTravelsPlugin.class,"/join.png"));
+        picLabel.removeAll();
+        picLabel.setIcon(null);
+        picLabel.revalidate();
+        picLabel.repaint();
+        JLabel infoLabel = new JLabel("<html>Join a lobby to be matched with a random location in Gielinor.<br>" +
+                "Every 10 minutes, your destination will update to a new location!</html>");
+        infoLabel.setForeground(Color.LIGHT_GRAY);
         buttonPanel.removeAll();
-        buttonPanel.add(showButton);
+        //buttonPanel.add(showButton);
+        buttonPanel.add(infoLabel);
         buttonPanel.add(startButton);
         buttonPanel.revalidate();
         buttonPanel.repaint();
@@ -113,22 +132,45 @@ public class GielinorTravelsPanel extends PluginPanel
 
     public void onTenMinute(){
         location.loadFromServer();
+        JLabel destLabel = new JLabel("<html>Travel to destination!</html>");
+        destLabel.setForeground(Color.LIGHT_GRAY);
+        buttonPanel.removeAll();
+        buttonPanel.add(destLabel);
+        JButton stopButton = new JButton("Leave Lobby");
+        stopButton.addActionListener(this::onStopButtonClicked);
+        buttonPanel.add(stopButton);
+        buttonPanel.revalidate();
+        buttonPanel.repaint();
         setScaledImage(location.getLocationImg());
         plugin.setDestination(location.getDestination());
         plugin.changeOverlayImage(location.getLocationImg());
         plugin.showOverlay();
     }
 
-    public void panelSendCompleted(String userid, String playerName) {
+    public void panelSendCompleted(String userid, String playerName, GielinorTravelsPlugin plugin) {
         try {
             location.imageClient.SendCompleted(
                     userid,
-                    playerName
+                    playerName,
+                    plugin
             );
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
-        setScaledImage(ImageUtil.loadImageResource(GielinorTravelsPlugin.class,"/waiting.png"));
+//        setScaledImage(ImageUtil.loadImageResource(GielinorTravelsPlugin.class,"/waiting.png"));
+        picLabel.removeAll();
+        picLabel.setIcon(null);
+        picLabel.revalidate();
+        picLabel.repaint();
+        JLabel waitLabel = new JLabel("<html>Waiting for next destination update in 10 minutes.</html>");
+        waitLabel.setForeground(Color.LIGHT_GRAY);
+        buttonPanel.removeAll();
+        buttonPanel.add(waitLabel);
+        JButton stopButton = new JButton("Leave Lobby");
+        stopButton.addActionListener(this::onStopButtonClicked);
+        buttonPanel.add(stopButton);
+        buttonPanel.revalidate();
+        buttonPanel.repaint();
     }
 
     public void leaveQueue() {
