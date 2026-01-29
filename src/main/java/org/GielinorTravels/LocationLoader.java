@@ -24,8 +24,14 @@ public class LocationLoader {
         imageClient.listenForImageEvents(userID+"",panel);
     }
 
-    public BufferedImage getLocationImg() { return locationImg; }
-    public WorldPoint getDestination() { return destination; }
+    public BufferedImage getLocationImg()
+    {
+        return locationImg;
+    }
+    public WorldPoint getDestination()
+    {
+        return destination;
+    }
 
 
     private int[] readWorldPointCSV(String line) {

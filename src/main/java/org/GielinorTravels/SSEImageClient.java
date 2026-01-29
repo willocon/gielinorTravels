@@ -126,7 +126,7 @@ public class SSEImageClient {
                         System.out.println("Received SSE: " + json);
 
                         handleEvent(json);
-                        panel.onTenMinute();
+                        panel.onSSE();
                     }
                 }
             }

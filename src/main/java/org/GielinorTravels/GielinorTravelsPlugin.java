@@ -52,8 +52,7 @@ public class GielinorTravelsPlugin extends Plugin
     private boolean showOverlayImage = false;
     private int ticksRemaining;
 
-    //timing logic
-    private int timerTicks;
+    // Found logic
     private boolean isFound = false;
 
 
@@ -97,7 +96,6 @@ public class GielinorTravelsPlugin extends Plugin
         final WorldPoint playerPos = client.getLocalPlayer().getWorldLocation();
         if (!isFound) {
             if (playerPos.equals(destination)) {
-                //client.addChatMessage(ChatMessageType.GAMEMESSAGE, "", "Reached destination Tile!: " + playerPos + " in " + timerTicks + " ticks!", null);
                 isFound = true;
                 // send some sort of packet to the server notifying it's been found
                 try {
@@ -111,12 +109,10 @@ public class GielinorTravelsPlugin extends Plugin
                 }
             }
         }
-        timerTicks++;
         if (showOverlayImage){
             ticksRemaining--;
             if (ticksRemaining <= 0){
                 showOverlayImage = false;
-                timerTicks = 0;
                 isFound=false;
             }
         }
@@ -127,6 +123,7 @@ public class GielinorTravelsPlugin extends Plugin
         clientThread.invoke(() -> client.addChatMessage(ChatMessageType.GAMEMESSAGE, "", "You reached the destination! You got " + score + " points!", null));
     }
 
+    // legacy method, kept for possible future use
     public void showLocation()
     {
         clientThread.invoke(() -> {
