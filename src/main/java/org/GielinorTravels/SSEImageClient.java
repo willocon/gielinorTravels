@@ -14,10 +14,6 @@ import java.nio.charset.StandardCharsets;
 public class SSEImageClient {
 
     private static final OkHttpClient client = new OkHttpClient.Builder()
-            .connectTimeout(0, java.util.concurrent.TimeUnit.MINUTES)
-            .readTimeout(0, java.util.concurrent.TimeUnit.MINUTES)
-            .writeTimeout(0, java.util.concurrent.TimeUnit.MINUTES)
-            .callTimeout(0, java.util.concurrent.TimeUnit.MINUTES)
             .build();
     private static final Gson gson = new Gson();
 
