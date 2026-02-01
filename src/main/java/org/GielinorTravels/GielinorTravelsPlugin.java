@@ -18,6 +18,7 @@ import net.runelite.client.ui.overlay.OverlayManager;
 import net.runelite.client.util.ImageUtil;
 
 import java.awt.image.BufferedImage;
+import java.time.LocalTime;
 
 @Slf4j
 @PluginDescriptor(
@@ -54,6 +55,9 @@ public class GielinorTravelsPlugin extends Plugin
 
     // Found logic
     private boolean isFound = false;
+
+    // 2 tick in a second error prevention
+    private boolean tickLock = false;
 
 
 
@@ -93,6 +97,16 @@ public class GielinorTravelsPlugin extends Plugin
 	@Subscribe
 	public void onGameTick(GameTick tick)
     {
+
+        if (panel.isInQueue() && !tickLock &&LocalTime.now().getSecond() == 1 && LocalTime.now().getMinute() % 10 == 0)
+        {
+            panel.onSSE();
+            tickLock = true;
+        }
+        else
+        {
+            tickLock = false;
+        }
         final WorldPoint playerPos = client.getLocalPlayer().getWorldLocation();
         if (!isFound) {
             if (playerPos.equals(destination)) {

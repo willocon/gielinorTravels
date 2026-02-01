@@ -22,7 +22,7 @@ public class SSEImageClient {
     private static final Gson gson = new Gson();
 
     // CHANGE THIS TO SERVER: https://gielinortravels.containers.uwcs.co.uk
-    private static final String BASE_URL = "https://gielinortravels.containers.uwcs.co.uk";
+    private static final String BASE_URL = "http://localhost:8080";
 
     private static BufferedImage downloadedImage;
     private static String downloadedCsv;
@@ -125,7 +125,7 @@ public class SSEImageClient {
                         String json = line.substring(6);
                         System.out.println("Received SSE: " + json);
 
-                        handleEvent(json);
+                        //handleEvent();
                         panel.onSSE();
                     }
                 }
@@ -134,12 +134,11 @@ public class SSEImageClient {
     }
 
     // Handles incoming SSE JSON event using Gson
-    private void handleEvent(String json) {
+    public void handleEvent() {
         try {
-            JsonObject obj = gson.fromJson(json, JsonObject.class);
 
-            String imageRelative = obj.get("image_url").getAsString();
-            String csvRelative = obj.get("csv_url").getAsString();
+            String imageRelative = "/images/screenshot.png";
+            String csvRelative = "/images/coords.csv";
 
             String imageUrl = BASE_URL + imageRelative;
             String csvUrl = BASE_URL + csvRelative;
