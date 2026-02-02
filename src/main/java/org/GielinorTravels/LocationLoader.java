@@ -20,7 +20,8 @@ public class LocationLoader {
     public LocationLoader(GielinorTravelsPlugin plugin, GielinorTravelsPanel panel){
         //join the queue and wait for image and csv
         long userID = plugin.client.getAccountHash();
-        imageClient.joinQueue(userID+"");
+        String username = plugin.client.getLocalPlayer().getName();
+        imageClient.joinQueue(userID+"",username);
         imageClient.listenForImageEvents(userID+"",panel);
     }
 

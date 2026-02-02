@@ -18,14 +18,14 @@ public class SSEImageClient {
     private static final Gson gson = new Gson();
 
     // CHANGE THIS TO SERVER: https://gielinortravels.containers.uwcs.co.uk
-    private static final String BASE_URL = "http://localhost:8080";
+    private static final String BASE_URL = "https://gielinortravels.containers.uwcs.co.uk";
 
     private static BufferedImage downloadedImage;
     private static String downloadedCsv;
 
     // Sends POST /join
-    public void joinQueue(String userId) throws Exception {
-        String json = "{\"user_id\":\"" + userId + "\"}";
+    public void joinQueue(String userId, String username) throws Exception {
+        String json = "{\"user_id\":\"" + userId + "\" , \"username\":\"" + username + "\"}";
 
         RequestBody body = RequestBody.create(
                 MediaType.parse("application/json"), json

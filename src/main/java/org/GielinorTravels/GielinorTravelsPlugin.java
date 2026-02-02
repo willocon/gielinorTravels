@@ -172,6 +172,11 @@ public class GielinorTravelsPlugin extends Plugin
         ticksRemaining = 10;
     }
 
+    public void hideOverlay()
+    {
+        showOverlayImage = false;
+    }
+
     public boolean isOverlayVisible()
     {
         return showOverlayImage;

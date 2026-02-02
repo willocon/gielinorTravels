@@ -84,6 +84,10 @@ public class GielinorTravelsPanel extends PluginPanel
         buttonPanel.repaint();
     }
 
+    private void removeOverlayButtonClicked(ActionEvent e){
+        plugin.hideOverlay();
+    }
+
     private void onStopButtonClicked(ActionEvent e){
         leaveQueue();
         picLabel.removeAll();
@@ -144,7 +148,10 @@ public class GielinorTravelsPanel extends PluginPanel
         buttonPanel.removeAll();
         JButton stopButton = new JButton("Leave Lobby");
         stopButton.addActionListener(this::onStopButtonClicked);
+        JButton overlayButton = new JButton("Remove Overlay Image Early");
+        overlayButton.addActionListener(this::removeOverlayButtonClicked);
         buttonPanel.add(stopButton);
+        buttonPanel.add(overlayButton);
         buttonPanel.revalidate();
         buttonPanel.repaint();
         setScaledImage(location.getLocationImg());
