@@ -49,6 +49,9 @@ public class LocationOverlay extends Overlay
 	private BufferedImage image;
 
 	@Inject
+	private GielinorTravelsConfig config;
+
+	@Inject
 	public LocationOverlay(GielinorTravelsPlugin plugin)
 	{
 		this.plugin = plugin;
@@ -69,7 +72,8 @@ public class LocationOverlay extends Overlay
 
 	public void setOverlayImage(BufferedImage newImg)
 	{
-		image = scaleImage(newImg, 500, 500);
+		int width = config.overlaySize();
+		image = scaleImage(newImg, width, width);
 	}
 
 	@Override

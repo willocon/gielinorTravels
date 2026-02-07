@@ -50,8 +50,10 @@ public class GielinorTravelsPanel extends PluginPanel
 	private final JLabel topLabel = new JLabel("Gielinor Travels");
 	private LocationLoader location;
 	private boolean inQueue = false;
+	private int timeUntilNext = 0;
+	private final int[] clockArray = {0, 1, 0, 1, 1};
 
-	public GielinorTravelsPanel(GielinorTravelsPlugin plugin, GielinorTravelsConfig config)
+	public GielinorTravelsPanel(GielinorTravelsPlugin plugin)
 	{
 		super();
 		this.plugin = plugin;
@@ -173,13 +175,16 @@ public class GielinorTravelsPanel extends PluginPanel
 	public void onSSE()
 	{
 		location.loadFromServer();
-		JLabel destLabel = new JLabel("<html>Travel to destination!</html>");
-		destLabel.setForeground(Color.LIGHT_GRAY);
+		//JLabel destLabel = new JLabel("<html>Travel to destination!</html>");
+		String timeStr = formatTime(timeUntilNext);
+		JLabel timeLabel = new JLabel("<html>Next destination update in: " + timeStr + "</html>");
+		//destLabel.setForeground(Color.LIGHT_GRAY);
 		textPanel.removeAll();
 		topLabel.setForeground(Color.LIGHT_GRAY);
 		topLabel.setHorizontalAlignment(SwingConstants.CENTER);
 		textPanel.add(topLabel, BorderLayout.NORTH);
-		textPanel.add(destLabel, BorderLayout.CENTER);
+		//textPanel.add(destLabel, BorderLayout.CENTER);
+		textPanel.add(timeLabel, BorderLayout.SOUTH);
 		textPanel.revalidate();
 		textPanel.repaint();
 
@@ -216,7 +221,8 @@ public class GielinorTravelsPanel extends PluginPanel
 		picLabel.setIcon(null);
 		picLabel.revalidate();
 		picLabel.repaint();
-		JLabel waitLabel = new JLabel("<html>Waiting for next destination update in 10 minutes.</html>");
+		String timeStr = formatTime(timeUntilNext);
+		JLabel waitLabel = new JLabel("<html>Next destination update in: " + timeStr + "</html>");
 		waitLabel.setForeground(Color.LIGHT_GRAY);
 		textPanel.removeAll();
 		topLabel.setForeground(Color.LIGHT_GRAY);
@@ -248,4 +254,37 @@ public class GielinorTravelsPanel extends PluginPanel
 		}
 	}
 
+	public void setTimeUntilNext(int seconds)
+	{
+		timeUntilNext = seconds;
+	}
+
+	public void updateTimeUntilNext(long tick)
+	{
+		int index = (int) (tick % 5);
+		if (clockArray[index] == 1)
+		{
+			timeUntilNext--;
+			if (isInQueue()&& timeUntilNext >= 0)
+			{
+				String timeStr = formatTime(timeUntilNext);
+				JLabel timeLabel = new JLabel("<html>Next destination update in: " + timeStr + "</html>");
+				timeLabel.setForeground(Color.LIGHT_GRAY);
+				textPanel.removeAll();
+				topLabel.setForeground(Color.LIGHT_GRAY);
+				topLabel.setHorizontalAlignment(SwingConstants.CENTER);
+				textPanel.add(topLabel, BorderLayout.NORTH);
+				textPanel.add(timeLabel, BorderLayout.CENTER);
+				textPanel.revalidate();
+				textPanel.repaint();
+			}
+		}
+	}
+
+	private String formatTime(int seconds)
+	{
+		int minutes = seconds / 60;
+		int secs = seconds % 60;
+		return String.format("%d:%02d", minutes, secs);
+	}
 }

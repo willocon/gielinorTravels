@@ -45,7 +45,9 @@ import net.runelite.client.util.ImageUtil;
 
 @Slf4j
 @PluginDescriptor(
-	name = "Example"
+	name = "Gielinor Travels",
+	description = "A location-based puzzle and time trial plugin for Old School RuneScape!",
+	tags = {"gielinor", "travels", "location", "puzzle", "time trial", "overlay", "geoguessr"}
 )
 public class GielinorTravelsPlugin extends Plugin
 {
@@ -75,18 +77,21 @@ public class GielinorTravelsPlugin extends Plugin
 	// 2 tick in a second error prevention
 	private boolean tickLock = false;
 
+	// tick counter for time until next location update
+	private long tickCounter = 0;
+
 
 	@Override
 	protected void startUp()
 	{
 		overlayManager.add(overlay);
 
-		panel = new GielinorTravelsPanel(this, config);
+		panel = new GielinorTravelsPanel(this);
 
 		final BufferedImage icon = ImageUtil.loadImageResource(GielinorTravelsPlugin.class, "/icon.png");
 
 		navButton = NavigationButton.builder()
-			.tooltip("Example Panel")
+			.tooltip("Gielinor Travels")
 			.icon(icon)
 			.priority(5)
 			.panel(panel)
@@ -112,9 +117,10 @@ public class GielinorTravelsPlugin extends Plugin
 	@Subscribe
 	public void onGameTick(GameTick tick)
 	{
-
-		if (panel.isInQueue() && !tickLock && LocalTime.now().getSecond() == 1 && LocalTime.now().getMinute() % 10 == 0)
+		tickCounter++;
+		if (panel.isInQueue() && !tickLock && LocalTime.now().getSecond() == 3 && LocalTime.now().getMinute() % 10 == 0)
 		{
+			panel.setTimeUntilNext(600);
 			panel.onSSE();
 			tickLock = true;
 		}
@@ -152,6 +158,7 @@ public class GielinorTravelsPlugin extends Plugin
 				isFound = false;
 			}
 		}
+		panel.updateTimeUntilNext(tickCounter);
 	}
 
 	public void displayScore(String score)
@@ -191,8 +198,8 @@ public class GielinorTravelsPlugin extends Plugin
 
 	public void showOverlay()
 	{
+		ticksRemaining = config.ticksToDisplay()+2;
 		showOverlayImage = true;
-		ticksRemaining = 10;
 	}
 
 	public void hideOverlay()

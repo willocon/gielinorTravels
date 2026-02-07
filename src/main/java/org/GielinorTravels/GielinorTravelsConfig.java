@@ -28,16 +28,27 @@ import net.runelite.client.config.Config;
 import net.runelite.client.config.ConfigGroup;
 import net.runelite.client.config.ConfigItem;
 
-@ConfigGroup("example")
+@ConfigGroup("Gielinor Travels")
 public interface GielinorTravelsConfig extends Config
 {
 	@ConfigItem(
-		keyName = "greeting",
-		name = "Welcome Greeting",
-		description = "The message to show to the user when they login"
+		keyName = "ticksToDisplay",
+		position = 0,
+		name = "Overlay display ticks",
+		description = "The number of ticks to display the overlay image for."
 	)
-	default String greeting()
+	default int ticksToDisplay()
 	{
-		return "Hello";
+		return 10;
+	}
+	@ConfigItem(
+		keyName = "overlaySize",
+		position = 1,
+		name = "Overlay size",
+		description = "The size of the overlay image in pixels. (X and Y are the same)"
+	)
+	default int overlaySize()
+	{
+		return 500;
 	}
 }

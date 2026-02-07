@@ -44,7 +44,7 @@ public class LocationLoader
 		//join the queue and wait for image and csv
 		long userID = plugin.client.getAccountHash();
 		String username = plugin.client.getLocalPlayer().getName();
-		imageClient.joinQueue(userID + "", username);
+		imageClient.joinQueue(userID + "", username, panel);
 		imageClient.listenForImageEvents(userID + "", panel);
 	}
 

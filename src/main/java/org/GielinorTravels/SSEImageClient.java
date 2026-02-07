@@ -74,7 +74,7 @@ public class SSEImageClient
 	}
 
 	// Sends POST /join
-	public void joinQueue(String userId, String username) throws Exception
+	public void joinQueue(String userId, String username, GielinorTravelsPanel panel) throws Exception
 	{
 		String json = "{\"user_id\":\"" + userId + "\" , \"username\":\"" + username + "\"}";
 
@@ -188,6 +188,13 @@ public class SSEImageClient
 						System.out.println("Received SSE: " + json);
 
 						//handleEvent();
+						JsonObject obj = gson.fromJson(json, JsonObject.class);
+						if (obj.has("time"))
+						{
+							int secondsUntilNext = 600 - obj.get("time").getAsInt();
+							System.out.println("Seconds until next event: " + secondsUntilNext);
+							panel.setTimeUntilNext(secondsUntilNext);
+						}
 						panel.onSSE();
 					}
 				}
