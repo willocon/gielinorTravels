@@ -243,6 +243,7 @@ public class GielinorTravelsPanel extends PluginPanel
 	public void leaveQueue()
 	{
 		inQueue = false;
+		plugin.hideOverlay();
 		try
 		{
 			long userID = plugin.client.getAccountHash();
