@@ -64,6 +64,8 @@ public class GielinorTravelsPlugin extends Plugin
 	private OverlayManager overlayManager;
 	@Inject
 	private LocationOverlay overlay;
+	@Inject
+	private SSEImageClient sseImageClient;
 	private NavigationButton navButton;
 	private WorldPoint destination;
 
@@ -86,7 +88,7 @@ public class GielinorTravelsPlugin extends Plugin
 	{
 		overlayManager.add(overlay);
 
-		panel = new GielinorTravelsPanel(this);
+		panel = new GielinorTravelsPanel(this, sseImageClient);
 
 		final BufferedImage icon = ImageUtil.loadImageResource(GielinorTravelsPlugin.class, "/icon.png");
 
@@ -105,7 +107,7 @@ public class GielinorTravelsPlugin extends Plugin
 	}
 
 	@Override
-	protected void shutDown() throws Exception
+	protected void shutDown()
 	{
 		overlayManager.remove(overlay);
 		clientToolbar.removeNavigation(navButton);
@@ -135,18 +137,11 @@ public class GielinorTravelsPlugin extends Plugin
 			{
 				isFound = true;
 				// send some sort of packet to the server notifying it's been found
-				try
-				{
-					panel.panelSendCompleted(
-						client.getAccountHash() + "",
-						client.getLocalPlayer().getName(),
-						this
-					);
-				}
-				catch (Exception e)
-				{
-					throw new RuntimeException(e);
-				}
+				panel.panelSendCompleted(
+					client.getAccountHash() + "",
+					client.getLocalPlayer().getName(),
+					this
+				);
 			}
 		}
 		if (showOverlayImage)

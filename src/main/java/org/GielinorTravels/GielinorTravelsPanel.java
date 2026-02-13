@@ -43,6 +43,7 @@ public class GielinorTravelsPanel extends PluginPanel
 {
 
 	private final GielinorTravelsPlugin plugin;
+	private final SSEImageClient sseImageClient;
 	private final JPanel textPanel = new JPanel();
 	private final JButton startButton = new JButton("Join Lobby");
 	private final JLabel picLabel = new JLabel();
@@ -53,10 +54,11 @@ public class GielinorTravelsPanel extends PluginPanel
 	private int timeUntilNext = 0;
 	private final int[] clockArray = {0, 1, 0, 1, 1};
 
-	public GielinorTravelsPanel(GielinorTravelsPlugin plugin)
+	public GielinorTravelsPanel(GielinorTravelsPlugin plugin, SSEImageClient sseImageClient)
 	{
 		super();
 		this.plugin = plugin;
+		this.sseImageClient = sseImageClient;
 
 		setLayout(new BorderLayout(0, 10));
 		setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
@@ -94,7 +96,7 @@ public class GielinorTravelsPanel extends PluginPanel
 
 	private void onStartButtonClicked(ActionEvent e)
 	{
-		location = new LocationLoader(plugin, this);
+		location = new LocationLoader(sseImageClient, plugin, this);
 		inQueue = true;
 
 
@@ -174,7 +176,16 @@ public class GielinorTravelsPanel extends PluginPanel
 
 	public void onSSE()
 	{
-		location.loadFromServer();
+		location.loadFromServer(() -> {
+			// This callback runs when the image and destination are loaded
+			java.awt.EventQueue.invokeLater(() -> {
+				setScaledImage(location.getLocationImg());
+				plugin.setDestination(location.getDestination());
+				plugin.changeOverlayImage(location.getLocationImg());
+				plugin.showOverlay();
+			});
+		});
+
 		//JLabel destLabel = new JLabel("<html>Travel to destination!</html>");
 		String timeStr = formatTime(timeUntilNext);
 		JLabel timeLabel = new JLabel("<html>Next destination update in: " + timeStr + "</html>");
@@ -197,26 +208,15 @@ public class GielinorTravelsPanel extends PluginPanel
 		buttonPanel.add(overlayButton);
 		buttonPanel.revalidate();
 		buttonPanel.repaint();
-		setScaledImage(location.getLocationImg());
-		plugin.setDestination(location.getDestination());
-		plugin.changeOverlayImage(location.getLocationImg());
-		plugin.showOverlay();
 	}
 
 	public void panelSendCompleted(String userid, String playerName, GielinorTravelsPlugin plugin)
 	{
-		try
-		{
-			location.imageClient.SendCompleted(
-				userid,
-				playerName,
-				plugin
-			);
-		}
-		catch (Exception e)
-		{
-			throw new RuntimeException(e);
-		}
+		location.imageClient.SendCompleted(
+			userid,
+			playerName,
+			plugin
+		);
 		picLabel.removeAll();
 		picLabel.setIcon(null);
 		picLabel.revalidate();
@@ -244,15 +244,8 @@ public class GielinorTravelsPanel extends PluginPanel
 	{
 		inQueue = false;
 		plugin.hideOverlay();
-		try
-		{
-			long userID = plugin.client.getAccountHash();
-			location.imageClient.leaveQueue(userID + "");
-		}
-		catch (Exception ex)
-		{
-			throw new RuntimeException(ex);
-		}
+		long userID = plugin.client.getAccountHash();
+		location.imageClient.leaveQueue(userID + "");
 	}
 
 	public void setTimeUntilNext(int seconds)

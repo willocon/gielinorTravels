@@ -29,8 +29,8 @@ import com.google.gson.JsonObject;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.net.URL;
-import java.nio.charset.StandardCharsets;
 import javax.imageio.ImageIO;
+import javax.inject.Inject;
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.MediaType;
@@ -43,9 +43,15 @@ import okio.BufferedSource;
 public class SSEImageClient
 {
 
-	private static final OkHttpClient client = new OkHttpClient.Builder()
-		.build();
-	private static final Gson gson = new Gson();
+	private final OkHttpClient client;
+	private final Gson gson;
+
+	@Inject
+	public SSEImageClient(OkHttpClient client, Gson gson)
+	{
+		this.client = client;
+		this.gson = gson;
+	}
 
 	// CHANGE THIS TO SERVER: https://gielinortravels.containers.uwcs.co.uk
 	private static final String BASE_URL = "https://gielinortravels.containers.uwcs.co.uk";
@@ -59,22 +65,8 @@ public class SSEImageClient
 		return ImageIO.read(new URL(url));
 	}
 
-	public static String loadCsv(String url) throws IOException
-	{
-		Request request = new Request.Builder().url(url).build();
-		Response response = client.newCall(request).execute();
-
-		if (!response.isSuccessful())
-		{
-			throw new IOException("Failed to download CSV: " + response);
-		}
-
-		byte[] data = response.body().bytes();
-		return new String(data, StandardCharsets.UTF_8);
-	}
-
 	// Sends POST /join
-	public void joinQueue(String userId, String username, GielinorTravelsPanel panel) throws Exception
+	public void joinQueue(String userId, String username)
 	{
 		String json = "{\"user_id\":\"" + userId + "\" , \"username\":\"" + username + "\"}";
 
@@ -87,15 +79,29 @@ public class SSEImageClient
 			.post(body)
 			.build();
 
-		try (Response response = client.newCall(request).execute())
+		client.newCall(request).enqueue(new Callback()
 		{
-			assert response.body() != null;
-			System.out.println("Joined: " + response.body().string());
-		}
+			@Override
+			public void onFailure(Call call, IOException e)
+			{
+				System.err.println("Failed to join queue: " + e.getMessage());
+				e.printStackTrace();
+			}
+
+			@Override
+			public void onResponse(Call call, Response response) throws IOException
+			{
+				if (response.body() != null)
+				{
+					System.out.println("Joined: " + response.body().string());
+				}
+				response.close();
+			}
+		});
 	}
 
 	//Sends POST /leave
-	public void leaveQueue(String userId) throws Exception
+	public void leaveQueue(String userId)
 	{
 		String json = "{\"user_id\":\"" + userId + "\"}";
 
@@ -108,15 +114,29 @@ public class SSEImageClient
 			.post(body)
 			.build();
 
-		try (Response response = client.newCall(request).execute())
+		client.newCall(request).enqueue(new Callback()
 		{
-			assert response.body() != null;
-			System.out.println("Left: " + response.body().string());
-		}
+			@Override
+			public void onFailure(Call call, IOException e)
+			{
+				System.err.println("Failed to leave queue: " + e.getMessage());
+				e.printStackTrace();
+			}
+
+			@Override
+			public void onResponse(Call call, Response response) throws IOException
+			{
+				if (response.body() != null)
+				{
+					System.out.println("Left: " + response.body().string());
+				}
+				response.close();
+			}
+		});
 	}
 
 	// Sends POST /completed
-	public void SendCompleted(String userId, String username, GielinorTravelsPlugin plugin) throws Exception
+	public void SendCompleted(String userId, String username, GielinorTravelsPlugin plugin)
 	{
 		String json = "{\"user_id\":\"" + userId + "\" , \"username\":\"" + username + "\"}";
 
@@ -129,23 +149,36 @@ public class SSEImageClient
 			.post(body)
 			.build();
 
-		try (Response response = client.newCall(request).execute())
+		client.newCall(request).enqueue(new Callback()
 		{
-			assert response.body() != null;
-			String responseJson = response.body().string();
-			System.out.println("Completed: " + responseJson);
-			JsonObject obj = gson.fromJson(responseJson, JsonObject.class);
-
-			if (!obj.has("score"))
+			@Override
+			public void onFailure(Call call, IOException e)
 			{
-				System.out.println("No score in response, user already completed");
-				return;
+				System.err.println("Failed to send completed: " + e.getMessage());
+				e.printStackTrace();
 			}
-			String score = obj.get("score").getAsString();
-			System.out.println("Score received: " + score);
-			plugin.displayScore(score);
 
-		}
+			@Override
+			public void onResponse(Call call, Response response) throws IOException
+			{
+				if (response.body() != null)
+				{
+					String responseJson = response.body().string();
+					System.out.println("Completed: " + responseJson);
+					JsonObject obj = gson.fromJson(responseJson, JsonObject.class);
+
+					if (!obj.has("score"))
+					{
+						System.out.println("No score in response, user already completed");
+						return;
+					}
+					String score = obj.get("score").getAsString();
+					System.out.println("Score received: " + score);
+					plugin.displayScore(score);
+				}
+				response.close();
+			}
+		});
 	}
 
 	// Opens SSE event stream
@@ -202,35 +235,58 @@ public class SSEImageClient
 		});
 	}
 
-	// Handles incoming SSE JSON event using Gson
-	public void handleEvent()
+	// Handles incoming SSE JSON event using Gson - downloads image and CSV asynchronously
+	public void handleEvent(Runnable onComplete)
 	{
-		try
+		String imageRelative = "/images/screenshot.png";
+		String csvRelative = "/images/coords.csv";
+
+		String imageUrl = BASE_URL + imageRelative;
+		String csvUrl = BASE_URL + csvRelative;
+
+		System.out.println("Loading image: " + imageUrl);
+		System.out.println("Downloading CSV: " + csvUrl);
+
+		// Download CSV asynchronously
+		Request csvRequest = new Request.Builder().url(csvUrl).build();
+		client.newCall(csvRequest).enqueue(new Callback()
 		{
+			@Override
+			public void onFailure(Call call, IOException e)
+			{
+				System.err.println("Failed to download CSV: " + e.getMessage());
+				e.printStackTrace();
+			}
 
-			String imageRelative = "/images/screenshot.png";
-			String csvRelative = "/images/coords.csv";
+			@Override
+			public void onResponse(Call call, Response response) throws IOException
+			{
+				if (response.body() != null)
+				{
+					downloadedCsv = response.body().string();
+					System.out.println("Loaded csv data: " + downloadedCsv);
 
-			String imageUrl = BASE_URL + imageRelative;
-			String csvUrl = BASE_URL + csvRelative;
+					// Now download the image asynchronously
+					try
+					{
+						downloadedImage = loadImage(imageUrl);
+						System.out.println("Loaded image: " + downloadedImage.getWidth() + "x" + downloadedImage.getHeight());
 
-			System.out.println("Loading image: " + imageUrl);
-			System.out.println("Downloading CSV: " + csvUrl);
-
-			// image
-			downloadedImage = loadImage(imageUrl);
-			System.out.println("Loaded image: " + downloadedImage.getWidth() + "x" + downloadedImage.getHeight());
-
-			// csv
-			downloadedCsv = loadCsv(csvUrl);
-			System.out.println("Loaded csv data: " + downloadedCsv);
-
-
-		}
-		catch (Exception e)
-		{
-			e.printStackTrace();
-		}
+						// Call the completion callback
+						if (onComplete != null)
+						{
+							onComplete.run();
+						}
+					}
+					catch (IOException e)
+					{
+						System.err.println("Failed to download image: " + e.getMessage());
+						e.printStackTrace();
+					}
+				}
+				response.close();
+			}
+		});
 	}
 
 	public BufferedImage getDownloadedImage()

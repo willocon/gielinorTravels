@@ -27,24 +27,23 @@ package org.GielinorTravels;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.List;
-import lombok.SneakyThrows;
 import net.runelite.api.coords.WorldPoint;
 
 public class LocationLoader
 {
 
-	public final SSEImageClient imageClient = new SSEImageClient();
+	public final SSEImageClient imageClient;
 	private BufferedImage locationImg;
 	private WorldPoint destination;
 
 
-	@SneakyThrows
-	public LocationLoader(GielinorTravelsPlugin plugin, GielinorTravelsPanel panel)
+	public LocationLoader(SSEImageClient imageClient, GielinorTravelsPlugin plugin, GielinorTravelsPanel panel)
 	{
+		this.imageClient = imageClient;
 		//join the queue and wait for image and csv
 		long userID = plugin.client.getAccountHash();
 		String username = plugin.client.getLocalPlayer().getName();
-		imageClient.joinQueue(userID + "", username, panel);
+		imageClient.joinQueue(userID + "", username);
 		imageClient.listenForImageEvents(userID + "", panel);
 	}
 
@@ -73,12 +72,20 @@ public class LocationLoader
 		return numbers.stream().mapToInt(Integer::intValue).toArray();
 	}
 
-	public void loadFromServer()
+	public void loadFromServer(Runnable onComplete)
 	{
-		imageClient.handleEvent();
-		this.locationImg = imageClient.getDownloadedImage();
-		String csvLine = imageClient.getDownloadedCsv();
-		int[] coords = readWorldPointCSV(csvLine);
-		this.destination = new WorldPoint(coords[0], coords[1], coords[2]);
+		imageClient.handleEvent(() -> {
+			// This callback runs after the image and CSV are loaded
+			this.locationImg = imageClient.getDownloadedImage();
+			String csvLine = imageClient.getDownloadedCsv();
+			int[] coords = readWorldPointCSV(csvLine);
+			this.destination = new WorldPoint(coords[0], coords[1], coords[2]);
+
+			// Notify the caller that data is ready
+			if (onComplete != null)
+			{
+				onComplete.run();
+			}
+		});
 	}
 }
