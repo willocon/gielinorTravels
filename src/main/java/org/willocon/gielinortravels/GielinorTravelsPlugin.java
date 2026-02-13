@@ -47,7 +47,7 @@ import net.runelite.client.util.ImageUtil;
 @PluginDescriptor(
 	name = "Gielinor Travels",
 	description = "A location-based puzzle and time trial plugin for Old School RuneScape!",
-	tags = {"gielinor", "travels", "location", "puzzle", "time trial", "overlay", "geoguessr"}
+	tags = {"gielinor", "travels", "location", "puzzle", "time trial", "overlay", "geoguessr", "Gieli Guessr"}
 )
 public class GielinorTravelsPlugin extends Plugin
 {
@@ -103,7 +103,7 @@ public class GielinorTravelsPlugin extends Plugin
 
 		destination = new WorldPoint(3245, 3225, 0);
 
-		log.info("Example started!");
+		log.info("Gielinor Travels started!");
 	}
 
 	@Override
@@ -113,7 +113,7 @@ public class GielinorTravelsPlugin extends Plugin
 		clientToolbar.removeNavigation(navButton);
 		panel.leaveQueue();
 		panel = null;
-		log.info("Example stopped!");
+		log.info("Gielinor Travels stopped!");
 	}
 
 	@Subscribe

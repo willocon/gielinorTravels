@@ -31,6 +31,7 @@ import java.io.IOException;
 import java.net.URL;
 import javax.imageio.ImageIO;
 import javax.inject.Inject;
+import lombok.extern.slf4j.Slf4j;
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.MediaType;
@@ -40,6 +41,7 @@ import okhttp3.RequestBody;
 import okhttp3.Response;
 import okio.BufferedSource;
 
+@Slf4j
 public class SSEImageClient
 {
 
@@ -84,7 +86,7 @@ public class SSEImageClient
 			@Override
 			public void onFailure(Call call, IOException e)
 			{
-				System.err.println("Failed to join queue: " + e.getMessage());
+				log.error("Failed to join queue: {}", e.getMessage());
 				e.printStackTrace();
 			}
 
@@ -93,7 +95,7 @@ public class SSEImageClient
 			{
 				if (response.body() != null)
 				{
-					System.out.println("Joined: " + response.body().string());
+					log.info("Joined: {}", response.body().string());
 				}
 				response.close();
 			}
@@ -119,7 +121,7 @@ public class SSEImageClient
 			@Override
 			public void onFailure(Call call, IOException e)
 			{
-				System.err.println("Failed to leave queue: " + e.getMessage());
+				log.error("Failed to leave queue: {}", e.getMessage());
 				e.printStackTrace();
 			}
 
@@ -128,7 +130,7 @@ public class SSEImageClient
 			{
 				if (response.body() != null)
 				{
-					System.out.println("Left: " + response.body().string());
+					log.info("Left: {}", response.body().string());
 				}
 				response.close();
 			}
@@ -154,7 +156,7 @@ public class SSEImageClient
 			@Override
 			public void onFailure(Call call, IOException e)
 			{
-				System.err.println("Failed to send completed: " + e.getMessage());
+				log.error("Failed to send completed: {}", e.getMessage());
 				e.printStackTrace();
 			}
 
@@ -164,16 +166,16 @@ public class SSEImageClient
 				if (response.body() != null)
 				{
 					String responseJson = response.body().string();
-					System.out.println("Completed: " + responseJson);
+					log.info("Completed: {}", responseJson);
 					JsonObject obj = gson.fromJson(responseJson, JsonObject.class);
 
 					if (!obj.has("score"))
 					{
-						System.out.println("No score in response, user already completed");
+						log.info("No score in response, user already completed");
 						return;
 					}
 					String score = obj.get("score").getAsString();
-					System.out.println("Score received: " + score);
+					log.info("Score received: {}", score);
 					plugin.displayScore(score);
 				}
 				response.close();
@@ -195,13 +197,13 @@ public class SSEImageClient
 			@Override
 			public void onFailure(Call call, IOException e)
 			{
-				System.err.println("SSE connection failed: " + e.getMessage());
+				log.error("SSE connection failed: {}", e.getMessage());
 			}
 
 			@Override
 			public void onResponse(Call call, Response response) throws IOException
 			{
-				System.out.println("Connected to SSE... waiting for image events");
+				log.info("Connected to SSE... waiting for image events");
 
 				assert response.body() != null;
 				BufferedSource source = response.body().source();
@@ -218,14 +220,14 @@ public class SSEImageClient
 					if (line.startsWith("data: "))
 					{
 						String json = line.substring(6);
-						System.out.println("Received SSE: " + json);
+						log.info("Received SSE: {}", json);
 
 						//handleEvent();
 						JsonObject obj = gson.fromJson(json, JsonObject.class);
 						if (obj.has("time"))
 						{
 							int secondsUntilNext = 600 - obj.get("time").getAsInt();
-							System.out.println("Seconds until next event: " + secondsUntilNext);
+							log.info("Seconds until next event: {}", secondsUntilNext);
 							panel.setTimeUntilNext(secondsUntilNext);
 						}
 						panel.onSSE();
@@ -244,8 +246,8 @@ public class SSEImageClient
 		String imageUrl = BASE_URL + imageRelative;
 		String csvUrl = BASE_URL + csvRelative;
 
-		System.out.println("Loading image: " + imageUrl);
-		System.out.println("Downloading CSV: " + csvUrl);
+		log.info("Loading image: " + imageUrl);
+		log.info("Downloading CSV: " + csvUrl);
 
 		// Download CSV asynchronously
 		Request csvRequest = new Request.Builder().url(csvUrl).build();
@@ -254,7 +256,7 @@ public class SSEImageClient
 			@Override
 			public void onFailure(Call call, IOException e)
 			{
-				System.err.println("Failed to download CSV: " + e.getMessage());
+				log.error("Failed to download CSV: " + e.getMessage());
 				e.printStackTrace();
 			}
 
@@ -264,13 +266,13 @@ public class SSEImageClient
 				if (response.body() != null)
 				{
 					downloadedCsv = response.body().string();
-					System.out.println("Loaded csv data: " + downloadedCsv);
+					log.info("Loaded csv data: " + downloadedCsv);
 
 					// Now download the image asynchronously
 					try
 					{
 						downloadedImage = loadImage(imageUrl);
-						System.out.println("Loaded image: " + downloadedImage.getWidth() + "x" + downloadedImage.getHeight());
+						log.info("Loaded image: " + downloadedImage.getWidth() + "x" + downloadedImage.getHeight());
 
 						// Call the completion callback
 						if (onComplete != null)
@@ -280,7 +282,7 @@ public class SSEImageClient
 					}
 					catch (IOException e)
 					{
-						System.err.println("Failed to download image: " + e.getMessage());
+						log.error("Failed to download image: " + e.getMessage());
 						e.printStackTrace();
 					}
 				}
