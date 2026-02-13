@@ -1,4 +1,4 @@
-package org.GielinorTravels;
+package org.willocon.gielinortravels;
 
 import net.runelite.client.RuneLite;
 import net.runelite.client.externalplugins.ExternalPluginManager;
