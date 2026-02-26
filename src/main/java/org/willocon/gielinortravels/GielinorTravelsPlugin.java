@@ -26,7 +26,6 @@ package org.willocon.gielinortravels;
 
 import com.google.inject.Provides;
 import java.awt.image.BufferedImage;
-import java.time.LocalTime;
 import javax.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
 import net.runelite.api.ChatMessageType;
@@ -76,9 +75,6 @@ public class GielinorTravelsPlugin extends Plugin
 	// Found logic
 	private boolean isFound = false;
 
-	// 2 tick in a second error prevention
-	private boolean tickLock = false;
-
 	// tick counter for time until next location update
 	private long tickCounter = 0;
 
@@ -120,16 +116,6 @@ public class GielinorTravelsPlugin extends Plugin
 	public void onGameTick(GameTick tick)
 	{
 		tickCounter++;
-		if (panel.isInQueue() && !tickLock && LocalTime.now().getSecond() == 3 && LocalTime.now().getMinute() % 10 == 0)
-		{
-			panel.setTimeUntilNext(600);
-			panel.onSSE();
-			tickLock = true;
-		}
-		else
-		{
-			tickLock = false;
-		}
 		final WorldPoint playerPos = client.getLocalPlayer().getWorldLocation();
 		if (!isFound)
 		{

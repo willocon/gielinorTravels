@@ -38,6 +38,7 @@ import javax.swing.JPanel;
 import javax.swing.SwingConstants;
 import javax.swing.border.EmptyBorder;
 import net.runelite.client.ui.PluginPanel;
+import net.runelite.client.util.LinkBrowser;
 
 public class GielinorTravelsPanel extends PluginPanel
 {
@@ -46,12 +47,15 @@ public class GielinorTravelsPanel extends PluginPanel
 	private final SSEImageClient sseImageClient;
 	private final JPanel textPanel = new JPanel();
 	private final JButton startButton = new JButton("Join Lobby");
+	private final JButton linkButton = new JButton("View Leaderboard");
 	private final JLabel picLabel = new JLabel();
 	private final JPanel buttonPanel = new JPanel();
-	private final JLabel topLabel = new JLabel("Gielinor Travels");
+	private final JLabel topLabel = new JLabel("<html><style> p {text-align: center;}h1 {text-align: center;}</style><h1><u>Gielinor Travels</u></h1><p>Join a lobby to be matched with a random location in Gielinor.<br>Every 10 minutes, your destination will update to a new location!<br>The aim of the game is to be the first to reach the location shown in the image.<br>The quicker you reach the destination, the more points you will receive!<br>You can see your scores on the online leaderboard by clicking the link button below!</p></html>");
+	private final JLabel waitLabel = new JLabel("<html><style> p {text-align: center;}h1 {text-align: center;}</style><h1><u>Gielinor Travels</u></h1><p>Waiting for server to send destination...<br>If this takes a while, leave and rejoin.</p></html>");
 	private LocationLoader location;
 	private boolean inQueue = false;
 	private int timeUntilNext = 0;
+	// clock array turns 5 ticks into 3 second intervals for when to update the time until next label
 	private final int[] clockArray = {0, 1, 0, 1, 1};
 
 	public GielinorTravelsPanel(GielinorTravelsPlugin plugin, SSEImageClient sseImageClient)
@@ -66,7 +70,7 @@ public class GielinorTravelsPanel extends PluginPanel
 		topLabel.setForeground(Color.LIGHT_GRAY);
 		topLabel.setHorizontalAlignment(SwingConstants.CENTER);
 		textPanel.setBorder(new EmptyBorder(0, 0, 0, 0));
-		textPanel.setLayout(new GridLayout(2, 1, 5, 5));
+		textPanel.setLayout(new GridLayout(1, 1, 5, 5));
 		textPanel.add(topLabel, BorderLayout.NORTH);
 
 		JPanel picPanel = new JPanel();
@@ -75,19 +79,16 @@ public class GielinorTravelsPanel extends PluginPanel
 
 		picPanel.add(picLabel, BorderLayout.NORTH);
 
-		JLabel infoLabel = new JLabel("<html>Join a lobby to be matched with a random location in Gielinor.<br>" +
-			"Every 10 minutes, your destination will update to a new location!</html>");
-		infoLabel.setForeground(Color.LIGHT_GRAY);
-		textPanel.add(infoLabel, BorderLayout.CENTER);
-
 		buttonPanel.setBorder(new EmptyBorder(0, 0, 0, 0));
 		buttonPanel.setLayout(new GridLayout(2, 1, 5, 5));
 
 
 		startButton.addActionListener(this::onStartButtonClicked);
+		linkButton.addActionListener(e -> LinkBrowser.browse("https://gielinortravels.containers.uwcs.co.uk/leaderboard"));
 
 
 		buttonPanel.add(startButton);
+		buttonPanel.add(linkButton);
 
 		add(textPanel, BorderLayout.NORTH);
 		add(picPanel, BorderLayout.CENTER);
@@ -99,14 +100,9 @@ public class GielinorTravelsPanel extends PluginPanel
 		location = new LocationLoader(sseImageClient, plugin, this);
 		inQueue = true;
 
-
-		JLabel waitLabel = new JLabel("<html>Waiting for server to send destination.</html>");
 		waitLabel.setForeground(Color.LIGHT_GRAY);
 		textPanel.removeAll();
-		topLabel.setForeground(Color.LIGHT_GRAY);
-		topLabel.setHorizontalAlignment(SwingConstants.CENTER);
-		textPanel.add(topLabel, BorderLayout.NORTH);
-		textPanel.add(waitLabel, BorderLayout.CENTER);
+		textPanel.add(waitLabel, BorderLayout.NORTH);
 		textPanel.revalidate();
 		textPanel.repaint();
 
@@ -131,19 +127,16 @@ public class GielinorTravelsPanel extends PluginPanel
 		picLabel.setIcon(null);
 		picLabel.revalidate();
 		picLabel.repaint();
-		JLabel infoLabel = new JLabel("<html>Join a lobby to be matched with a random location in Gielinor.<br>" +
-			"Every 10 minutes, your destination will update to a new location!</html>");
-		infoLabel.setForeground(Color.LIGHT_GRAY);
 		textPanel.removeAll();
 		topLabel.setForeground(Color.LIGHT_GRAY);
 		topLabel.setHorizontalAlignment(SwingConstants.CENTER);
 		textPanel.add(topLabel, BorderLayout.NORTH);
-		textPanel.add(infoLabel, BorderLayout.CENTER);
 		textPanel.revalidate();
 		textPanel.repaint();
 
 		buttonPanel.removeAll();
 		buttonPanel.add(startButton);
+		buttonPanel.add(linkButton);
 		buttonPanel.revalidate();
 		buttonPanel.repaint();
 
@@ -186,16 +179,11 @@ public class GielinorTravelsPanel extends PluginPanel
 			});
 		});
 
-		//JLabel destLabel = new JLabel("<html>Travel to destination!</html>");
 		String timeStr = formatTime(timeUntilNext);
-		JLabel timeLabel = new JLabel("<html>Next destination update in: " + timeStr + "</html>");
-		//destLabel.setForeground(Color.LIGHT_GRAY);
+		JLabel timeLabel = new JLabel("<html><style> p {text-align: center;}h1 {text-align: center;}</style><h1><u>Gielinor Travels</u></h1><p>Next destination update in: " + timeStr + "</p></html>");
+
 		textPanel.removeAll();
-		topLabel.setForeground(Color.LIGHT_GRAY);
-		topLabel.setHorizontalAlignment(SwingConstants.CENTER);
-		textPanel.add(topLabel, BorderLayout.NORTH);
-		//textPanel.add(destLabel, BorderLayout.CENTER);
-		textPanel.add(timeLabel, BorderLayout.SOUTH);
+		textPanel.add(timeLabel, BorderLayout.NORTH);
 		textPanel.revalidate();
 		textPanel.repaint();
 
@@ -222,13 +210,11 @@ public class GielinorTravelsPanel extends PluginPanel
 		picLabel.revalidate();
 		picLabel.repaint();
 		String timeStr = formatTime(timeUntilNext);
-		JLabel waitLabel = new JLabel("<html>Next destination update in: " + timeStr + "</html>");
+		JLabel timeLabel = new JLabel("<html><style> p {text-align: center;}h1 {text-align: center;}</style><h1><u>Gielinor Travels</u></h1><p>Next destination update in: " + timeStr + "</p></html>");
+
 		waitLabel.setForeground(Color.LIGHT_GRAY);
 		textPanel.removeAll();
-		topLabel.setForeground(Color.LIGHT_GRAY);
-		topLabel.setHorizontalAlignment(SwingConstants.CENTER);
-		textPanel.add(topLabel, BorderLayout.NORTH);
-		textPanel.add(waitLabel, BorderLayout.CENTER);
+		textPanel.add(timeLabel, BorderLayout.NORTH);
 		textPanel.revalidate();
 		textPanel.repaint();
 
@@ -259,19 +245,22 @@ public class GielinorTravelsPanel extends PluginPanel
 		if (clockArray[index] == 1)
 		{
 			timeUntilNext--;
-			if (isInQueue()&& timeUntilNext >= 0)
+			if (isInQueue() && timeUntilNext >= 0)
 			{
 				String timeStr = formatTime(timeUntilNext);
-				JLabel timeLabel = new JLabel("<html>Next destination update in: " + timeStr + "</html>");
+				JLabel timeLabel = new JLabel("<html><style> p {text-align: center;}h1 {text-align: center;}</style><h1><u>Gielinor Travels</u></h1><p>Next destination update in: " + timeStr + "</p></html>");
+
 				timeLabel.setForeground(Color.LIGHT_GRAY);
 				textPanel.removeAll();
-				topLabel.setForeground(Color.LIGHT_GRAY);
-				topLabel.setHorizontalAlignment(SwingConstants.CENTER);
-				textPanel.add(topLabel, BorderLayout.NORTH);
-				textPanel.add(timeLabel, BorderLayout.CENTER);
+				textPanel.add(timeLabel, BorderLayout.NORTH);
 				textPanel.revalidate();
 				textPanel.repaint();
 			}
+		}
+		if (isInQueue() && timeUntilNext == -1)
+		{
+			timeUntilNext = 600;
+			onSSE();
 		}
 	}
 
