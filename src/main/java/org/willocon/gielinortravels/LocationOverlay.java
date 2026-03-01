@@ -35,18 +35,21 @@ import javax.inject.Inject;
 import net.runelite.api.Perspective;
 import net.runelite.api.Tile;
 import net.runelite.api.WorldView;
+import net.runelite.api.Point;
 import net.runelite.api.coords.LocalPoint;
 import net.runelite.api.coords.WorldPoint;
 import net.runelite.client.ui.overlay.Overlay;
 import net.runelite.client.ui.overlay.OverlayLayer;
 import net.runelite.client.ui.overlay.OverlayPosition;
 import net.runelite.client.ui.overlay.OverlayUtil;
+import net.runelite.client.ui.overlay.components.TextComponent;
 
 public class LocationOverlay extends Overlay
 {
 
 	private final GielinorTravelsPlugin plugin;
 	private BufferedImage image;
+	private final TextComponent textComponent = new TextComponent();
 
 	@Inject
 	private GielinorTravelsConfig config;
@@ -86,7 +89,7 @@ public class LocationOverlay extends Overlay
 			if (wv.contains(dest))
 			{
 				Tile tile = wv.getScene().getTiles()[dest.getPlane()][dest.getX() - wv.getBaseX()][dest.getY() - wv.getBaseY()];
-				renderDestTile(g, tile.getLocalLocation());
+				renderDestTile(g, tile);
 			}
 		}
 
@@ -110,8 +113,9 @@ public class LocationOverlay extends Overlay
 		return null;
 	}
 
-	private void renderDestTile(final Graphics2D graphics, final LocalPoint destPoint)
+	private void renderDestTile(final Graphics2D graphics, Tile tile)
 	{
+		LocalPoint destPoint = tile.getLocalLocation();
 		if (destPoint == null)
 		{
 			return;
@@ -123,5 +127,11 @@ public class LocationOverlay extends Overlay
 			return;
 		}
 		OverlayUtil.renderPolygon(graphics, poly, Color.YELLOW);
+
+		final Point textPoint = Perspective.getCanvasTextLocation(plugin.client, graphics, destPoint, "Gielinor Travels", 0);
+		textComponent.setText("Gielinor Travels");
+		textComponent.setColor(Color.YELLOW);
+		textComponent.setPosition(new java.awt.Point(textPoint.getX(), textPoint.getY()));
+		textComponent.render(graphics);
 	}
 }

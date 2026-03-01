@@ -46,11 +46,11 @@ public class GielinorTravelsPanel extends PluginPanel
 	private final GielinorTravelsPlugin plugin;
 	private final SSEImageClient sseImageClient;
 	private final JPanel textPanel = new JPanel();
-	private final JButton startButton = new JButton("Join Lobby");
+	private final JButton startButton = new JButton("Join Game");
 	private final JButton linkButton = new JButton("View Leaderboard");
 	private final JLabel picLabel = new JLabel();
 	private final JPanel buttonPanel = new JPanel();
-	private final JLabel topLabel = new JLabel("<html><style> p {text-align: center;}h1 {text-align: center;}</style><h1><u>Gielinor Travels</u></h1><p>Join a lobby to be matched with a random location in Gielinor.<br>Every 10 minutes, your destination will update to a new location!<br>The aim of the game is to be the first to reach the location shown in the image.<br>The quicker you reach the destination, the more points you will receive!<br>You can see your scores on the online leaderboard by clicking the link button below!</p></html>");
+	private final JLabel topLabel = new JLabel("<html><style> p {text-align: center;}h1 {text-align: center;}</style><h1><u>Gielinor Travels</u></h1><p>Join a game to be matched with a random location in Gielinor.<br>Every 10 minutes, your destination will update to a new location!<br>The aim of the game is to be the first to reach the location shown in the image.<br>The quicker you reach the destination, the more points you will receive!<br>You can see your scores on the online leaderboard by clicking the link button below!</p></html>");
 	private final JLabel waitLabel = new JLabel("<html><style> p {text-align: center;}h1 {text-align: center;}</style><h1><u>Gielinor Travels</u></h1><p>Waiting for server to send destination...<br>If this takes a while, leave and rejoin.</p></html>");
 	private LocationLoader location;
 	private boolean inQueue = false;
@@ -80,7 +80,7 @@ public class GielinorTravelsPanel extends PluginPanel
 		picPanel.add(picLabel, BorderLayout.NORTH);
 
 		buttonPanel.setBorder(new EmptyBorder(0, 0, 0, 0));
-		buttonPanel.setLayout(new GridLayout(2, 1, 5, 5));
+		buttonPanel.setLayout(new GridLayout(3, 1, 5, 5));
 
 
 		startButton.addActionListener(this::onStartButtonClicked);
@@ -107,7 +107,7 @@ public class GielinorTravelsPanel extends PluginPanel
 		textPanel.repaint();
 
 		buttonPanel.removeAll();
-		JButton stopButton = new JButton("Leave Lobby");
+		JButton stopButton = new JButton("Leave Game");
 		stopButton.addActionListener(this::onStopButtonClicked);
 
 		buttonPanel.add(stopButton);
@@ -188,12 +188,15 @@ public class GielinorTravelsPanel extends PluginPanel
 		textPanel.repaint();
 
 		buttonPanel.removeAll();
-		JButton stopButton = new JButton("Leave Lobby");
+		JButton stopButton = new JButton("Leave Game");
 		stopButton.addActionListener(this::onStopButtonClicked);
 		JButton overlayButton = new JButton("Remove Overlay Image Early");
 		overlayButton.addActionListener(this::removeOverlayButtonClicked);
+		JButton showImageAgainButton = new JButton("Show Overlay Image Again");
+		showImageAgainButton.addActionListener(e -> plugin.showOverlay());
 		buttonPanel.add(stopButton);
 		buttonPanel.add(overlayButton);
+		buttonPanel.add(showImageAgainButton);
 		buttonPanel.revalidate();
 		buttonPanel.repaint();
 	}
@@ -219,7 +222,7 @@ public class GielinorTravelsPanel extends PluginPanel
 		textPanel.repaint();
 
 		buttonPanel.removeAll();
-		JButton stopButton = new JButton("Leave Lobby");
+		JButton stopButton = new JButton("Leave Game");
 		stopButton.addActionListener(this::onStopButtonClicked);
 		buttonPanel.add(stopButton);
 		buttonPanel.revalidate();
@@ -255,6 +258,11 @@ public class GielinorTravelsPanel extends PluginPanel
 				textPanel.add(timeLabel, BorderLayout.NORTH);
 				textPanel.revalidate();
 				textPanel.repaint();
+
+				if (timeUntilNext == 60)
+				{
+					plugin.oneMinuteWarning();
+				}
 			}
 		}
 		if (isInQueue() && timeUntilNext == -1)
