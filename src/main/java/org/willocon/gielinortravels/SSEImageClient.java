@@ -176,6 +176,12 @@ public class SSEImageClient
 					}
 					String score = obj.get("score").getAsString();
 					log.info("Score received: {}", score);
+
+					if(obj.has("message") && obj.get("message").getAsString().equals("winner"))
+					{
+						log.info("Winner!");
+						plugin.displayWinner();
+					}
 					plugin.displayScore(score);
 				}
 				response.close();

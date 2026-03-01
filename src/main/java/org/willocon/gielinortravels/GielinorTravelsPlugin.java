@@ -78,6 +78,9 @@ public class GielinorTravelsPlugin extends Plugin
 	// tick counter for time until next location update
 	private long tickCounter = 0;
 
+	// array to hold a 5x5 grid of world points around the destination to reduce the chances of unwinnable locations being generated
+	private WorldPoint[] surroundingPoints = new WorldPoint[25];
+
 
 	@Override
 	protected void startUp()
@@ -91,13 +94,13 @@ public class GielinorTravelsPlugin extends Plugin
 		navButton = NavigationButton.builder()
 			.tooltip("Gielinor Travels")
 			.icon(icon)
-			.priority(5)
+			.priority(30)
 			.panel(panel)
 			.build();
 
 		clientToolbar.addNavigation(navButton);
 
-		destination = new WorldPoint(3245, 3225, 0);
+		setDestination(new WorldPoint(3245, 3225, 0));
 
 		log.info("Gielinor Travels started!");
 	}
@@ -119,7 +122,7 @@ public class GielinorTravelsPlugin extends Plugin
 		final WorldPoint playerPos = client.getLocalPlayer().getWorldLocation();
 		if (!isFound)
 		{
-			if (playerPos.equals(destination))
+			if (isPlayerInSurrounding(playerPos))
 			{
 				isFound = true;
 				// send some sort of packet to the server notifying it's been found
@@ -133,18 +136,40 @@ public class GielinorTravelsPlugin extends Plugin
 		if (showOverlayImage)
 		{
 			ticksRemaining--;
+			isFound = false;
 			if (ticksRemaining <= 0)
 			{
 				showOverlayImage = false;
-				isFound = false;
 			}
 		}
 		panel.updateTimeUntilNext(tickCounter);
 	}
 
+	private boolean isPlayerInSurrounding(WorldPoint playerPos)
+	{
+		for (WorldPoint point : surroundingPoints)
+		{
+			if (playerPos.equals(point))
+			{
+				return true;
+			}
+		}
+		return false;
+	}
+
 	public void displayScore(String score)
 	{
 		clientThread.invoke(() -> client.addChatMessage(ChatMessageType.GAMEMESSAGE, "", "You reached the destination! You got " + score + " points!", null));
+	}
+
+	public void displayWinner()
+	{
+		clientThread.invoke(() -> client.addChatMessage(ChatMessageType.GAMEMESSAGE, "", "Congratulations! You were the first to reach the destination!", null));
+	}
+
+	public void oneMinuteWarning()
+	{
+		clientThread.invoke(() -> client.addChatMessage(ChatMessageType.GAMEMESSAGE, "", "1 minute until next location update!", null));
 	}
 
 	// legacy method, kept for possible future use
@@ -169,6 +194,12 @@ public class GielinorTravelsPlugin extends Plugin
 
 	public void setDestination(WorldPoint newDestination)
 	{
+		for (int i = 0; i < surroundingPoints.length; i++)
+		{
+			int xOffset = (i % 5) - 2; // -2, -1, 0, or 1, 2
+			int yOffset = (i / 5) - 2; // -2, -1, 0, or 1, 2
+			surroundingPoints[i] = new WorldPoint(newDestination.getX() + xOffset, newDestination.getY() + yOffset, newDestination.getPlane());
+		}
 		destination = newDestination;
 	}
 
