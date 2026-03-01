@@ -95,7 +95,7 @@ public class SSEImageClient
 			{
 				if (response.body() != null)
 				{
-					log.info("Joined: {}", response.body().string());
+					log.debug("Joined: {}", response.body().string());
 				}
 				response.close();
 			}
@@ -130,7 +130,7 @@ public class SSEImageClient
 			{
 				if (response.body() != null)
 				{
-					log.info("Left: {}", response.body().string());
+					log.debug("Left: {}", response.body().string());
 				}
 				response.close();
 			}
@@ -166,20 +166,20 @@ public class SSEImageClient
 				if (response.body() != null)
 				{
 					String responseJson = response.body().string();
-					log.info("Completed: {}", responseJson);
+					log.debug("Completed: {}", responseJson);
 					JsonObject obj = gson.fromJson(responseJson, JsonObject.class);
 
 					if (!obj.has("score"))
 					{
-						log.info("No score in response, user already completed");
+						log.debug("No score in response, user already completed");
 						return;
 					}
 					String score = obj.get("score").getAsString();
-					log.info("Score received: {}", score);
+					log.debug("Score received: {}", score);
 
 					if(obj.has("message") && obj.get("message").getAsString().equals("winner"))
 					{
-						log.info("Winner!");
+						log.debug("Winner!");
 						plugin.displayWinner();
 					}
 					plugin.displayScore(score);
@@ -209,7 +209,7 @@ public class SSEImageClient
 			@Override
 			public void onResponse(Call call, Response response) throws IOException
 			{
-				log.info("Connected to SSE... waiting for image events");
+				log.debug("Connected to SSE... waiting for image events");
 
 				assert response.body() != null;
 				BufferedSource source = response.body().source();
@@ -226,14 +226,14 @@ public class SSEImageClient
 					if (line.startsWith("data: "))
 					{
 						String json = line.substring(6);
-						log.info("Received SSE: {}", json);
+						log.debug("Received SSE: {}", json);
 
 						//handleEvent();
 						JsonObject obj = gson.fromJson(json, JsonObject.class);
 						if (obj.has("time"))
 						{
 							int secondsUntilNext = 600 - obj.get("time").getAsInt();
-							log.info("Seconds until next event: {}", secondsUntilNext);
+							log.debug("Seconds until next event: {}", secondsUntilNext);
 							panel.setTimeUntilNext(secondsUntilNext);
 						}
 						panel.onSSE();
@@ -252,8 +252,8 @@ public class SSEImageClient
 		String imageUrl = BASE_URL + imageRelative;
 		String csvUrl = BASE_URL + csvRelative;
 
-		log.info("Loading image: " + imageUrl);
-		log.info("Downloading CSV: " + csvUrl);
+		log.debug("Loading image: " + imageUrl);
+		log.debug("Downloading CSV: " + csvUrl);
 
 		// Download CSV asynchronously
 		Request csvRequest = new Request.Builder().url(csvUrl).build();
@@ -272,13 +272,13 @@ public class SSEImageClient
 				if (response.body() != null)
 				{
 					downloadedCsv = response.body().string();
-					log.info("Loaded csv data: " + downloadedCsv);
+					log.debug("Loaded csv data: " + downloadedCsv);
 
 					// Now download the image asynchronously
 					try
 					{
 						downloadedImage = loadImage(imageUrl);
-						log.info("Loaded image: " + downloadedImage.getWidth() + "x" + downloadedImage.getHeight());
+						log.debug("Loaded image: " + downloadedImage.getWidth() + "x" + downloadedImage.getHeight());
 
 						// Call the completion callback
 						if (onComplete != null)
