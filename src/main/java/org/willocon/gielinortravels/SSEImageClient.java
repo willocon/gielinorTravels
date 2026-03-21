@@ -56,7 +56,7 @@ public class SSEImageClient
 	}
 
 	// CHANGE THIS TO SERVER: https://gielinortravels.containers.uwcs.co.uk
-	private static final String BASE_URL = "https://gielinortravels.containers.uwcs.co.uk";
+	private static final String BASE_URL = "http://localhost:8080";
 
 	private static BufferedImage downloadedImage;
 	private static String downloadedCsv;
@@ -232,9 +232,15 @@ public class SSEImageClient
 						JsonObject obj = gson.fromJson(json, JsonObject.class);
 						if (obj.has("time"))
 						{
-							int secondsUntilNext = 600 - obj.get("time").getAsInt();
+							int secondsUntilNext = 601 - obj.get("time").getAsInt(); // extra second allows server time to update
 							log.debug("Seconds until next event: {}", secondsUntilNext);
 							panel.setTimeUntilNext(secondsUntilNext);
+						}
+						if (obj.has("difficulty" ))
+						{
+							int difficulty = obj.get("difficulty").getAsInt();
+							log.debug("Difficulty: {}", difficulty);
+							panel.setDifficulty(difficulty);
 						}
 						panel.onSSE();
 					}
