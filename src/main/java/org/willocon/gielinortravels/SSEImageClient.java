@@ -56,7 +56,7 @@ public class SSEImageClient
 	}
 
 	// CHANGE THIS TO SERVER: https://gielinortravels.containers.uwcs.co.uk
-	private static final String BASE_URL = "http://localhost:8080";
+	private static final String BASE_URL = "https://gielinortravels.containers.uwcs.co.uk";
 
 	private static BufferedImage downloadedImage;
 	private static String downloadedCsv;
