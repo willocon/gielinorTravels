@@ -210,7 +210,7 @@ public class GielinorTravelsPlugin extends Plugin
 
 	public void showOverlay()
 	{
-		ticksRemaining = config.ticksToDisplay()+2;
+		ticksRemaining = config.ticksToDisplay();
 		showOverlayImage = true;
 	}
 
