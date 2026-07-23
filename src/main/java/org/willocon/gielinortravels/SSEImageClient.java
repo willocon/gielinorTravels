@@ -49,6 +49,9 @@ public class SSEImageClient
 	private final Gson gson;
 
 	@Inject
+	private GielinorTravelsConfig config;
+
+	@Inject
 	public SSEImageClient(OkHttpClient client, Gson gson)
 	{
 		this.client = client;
@@ -56,7 +59,7 @@ public class SSEImageClient
 	}
 
 	// CHANGE THIS TO SERVER: https://gielinortravels.containers.uwcs.co.uk
-	private static final String BASE_URL = "https://gielinortravels.containers.uwcs.co.uk";
+//	private final String BASE_URl = config.urlEndpoint();
 
 	private static BufferedImage downloadedImage;
 	private static String downloadedCsv;
@@ -77,7 +80,7 @@ public class SSEImageClient
 		);
 
 		Request request = new Request.Builder()
-			.url(BASE_URL + "/join")
+			.url(config.urlEndpoint() + "/join")
 			.post(body)
 			.build();
 
@@ -112,7 +115,7 @@ public class SSEImageClient
 		);
 
 		Request request = new Request.Builder()
-			.url(BASE_URL + "/leave")
+			.url(config.urlEndpoint() + "/leave")
 			.post(body)
 			.build();
 
@@ -147,7 +150,7 @@ public class SSEImageClient
 		);
 
 		Request request = new Request.Builder()
-			.url(BASE_URL + "/completed")
+			.url(config.urlEndpoint() + "/completed")
 			.post(body)
 			.build();
 
@@ -172,6 +175,7 @@ public class SSEImageClient
 					if (!obj.has("score"))
 					{
 						log.debug("No score in response, user already completed");
+						plugin.displayAlreadyComplete();
 						return;
 					}
 					String score = obj.get("score").getAsString();
@@ -193,7 +197,7 @@ public class SSEImageClient
 	public void listenForImageEvents(String userId, GielinorTravelsPanel panel)
 	{
 		Request request = new Request.Builder()
-			.url(BASE_URL + "/events?user_id=" + userId)
+			.url(config.urlEndpoint() + "/events?user_id=" + userId)
 			.get()
 			.build();
 
@@ -255,8 +259,8 @@ public class SSEImageClient
 		String imageRelative = "/images/screenshot.png";
 		String csvRelative = "/images/coords.csv";
 
-		String imageUrl = BASE_URL + imageRelative;
-		String csvUrl = BASE_URL + csvRelative;
+		String imageUrl = config.urlEndpoint() + imageRelative;
+		String csvUrl = config.urlEndpoint() + csvRelative;
 
 		log.debug("Loading image: " + imageUrl);
 		log.debug("Downloading CSV: " + csvUrl);

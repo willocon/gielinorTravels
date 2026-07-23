@@ -27,6 +27,7 @@ package org.willocon.gielinortravels;
 import net.runelite.client.config.Config;
 import net.runelite.client.config.ConfigGroup;
 import net.runelite.client.config.ConfigItem;
+import net.runelite.client.config.Range;
 
 @ConfigGroup("Gielinor Travels")
 public interface GielinorTravelsConfig extends Config
@@ -41,14 +42,41 @@ public interface GielinorTravelsConfig extends Config
 	{
 		return 10;
 	}
+
 	@ConfigItem(
 		keyName = "overlaySize",
-		position = 1,
+		position = 100,
 		name = "Overlay size",
 		description = "The size of the overlay image in pixels. (X and Y are the same)"
 	)
 	default int overlaySize()
 	{
 		return 500;
+	}
+
+	@Range(
+		min = 0,
+		max = 200
+	)
+	@ConfigItem(
+		keyName = "audioVolume",
+		position = 150,
+		name = "Volume",
+		description = "The volume of the audio clip played when the game is completed. (0-200)"
+	)
+	default int audioVolume()
+	{
+		return 50;
+	}
+
+	@ConfigItem(
+		keyName = "URlEndpoint",
+		position = 200,
+		name = "URL endpoint",
+		description = "The URL endpoint for the connected server. (Default: https://gielinortravels.containers.uwcs.co.uk)"
+	)
+	default String urlEndpoint()
+	{
+		return "https://gielinortravels.containers.uwcs.co.uk";
 	}
 }

@@ -43,7 +43,6 @@ import net.runelite.client.util.LinkBrowser;
 
 public class GielinorTravelsPanel extends PluginPanel
 {
-
 	private final GielinorTravelsPlugin plugin;
 	private final SSEImageClient sseImageClient;
 	private final JPanel textPanel = new JPanel();
@@ -60,7 +59,7 @@ public class GielinorTravelsPanel extends PluginPanel
 	// clock array turns 5 ticks into 3 second intervals for when to update the time until next label
 	private final int[] clockArray = {0, 1, 0, 1, 1};
 
-	public GielinorTravelsPanel(GielinorTravelsPlugin plugin, SSEImageClient sseImageClient)
+	public GielinorTravelsPanel(GielinorTravelsPlugin plugin, SSEImageClient sseImageClient, GielinorTravelsConfig config)
 	{
 		super();
 		this.plugin = plugin;
@@ -86,7 +85,7 @@ public class GielinorTravelsPanel extends PluginPanel
 
 
 		startButton.addActionListener(this::onStartButtonClicked);
-		linkButton.addActionListener(e -> LinkBrowser.browse("https://gielinortravels.containers.uwcs.co.uk/leaderboard"));
+		linkButton.addActionListener(e -> LinkBrowser.browse(config.urlEndpoint()+"/leaderboard"));
 
 
 		buttonPanel.add(startButton);
@@ -182,7 +181,7 @@ public class GielinorTravelsPanel extends PluginPanel
 		});
 
 		String timeStr = formatTime(timeUntilNext);
-		JLabel timeLabel = new JLabel("<html><style> p {text-align: center;}h1 {text-align: center;}</style><h1><u>Gielinor Travels</u></h1><p>Next destination update in: " + timeStr + "</p><p>Difficulty: " + StringUtils.repeat("*",gameDifficulty) +"</p></html>");
+		JLabel timeLabel = new JLabel("<html><style> p {text-align: center;}h1 {text-align: center;}</style><h1><u>Gielinor Travels</u></h1><p>Next destination update in: " + timeStr + "</p><p>Difficulty: " + StringUtils.repeat("*", gameDifficulty) + "</p></html>");
 
 		textPanel.removeAll();
 		textPanel.add(timeLabel, BorderLayout.NORTH);
@@ -258,7 +257,7 @@ public class GielinorTravelsPanel extends PluginPanel
 			if (isInQueue() && timeUntilNext >= 0)
 			{
 				String timeStr = formatTime(timeUntilNext);
-				JLabel timeLabel = new JLabel("<html><style> p {text-align: center;}h1 {text-align: center;}</style><h1><u>Gielinor Travels</u></h1><p>Next destination update in: " + timeStr + "</p><p>Difficulty: " + StringUtils.repeat("*",gameDifficulty) +"</p></html>");
+				JLabel timeLabel = new JLabel("<html><style> p {text-align: center;}h1 {text-align: center;}</style><h1><u>Gielinor Travels</u></h1><p>Next destination update in: " + timeStr + "</p><p>Difficulty: " + StringUtils.repeat("*", gameDifficulty) + "</p></html>");
 
 				timeLabel.setForeground(Color.LIGHT_GRAY);
 				textPanel.removeAll();

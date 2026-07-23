@@ -51,20 +51,31 @@ import net.runelite.client.util.ImageUtil;
 public class GielinorTravelsPlugin extends Plugin
 {
 	public GielinorTravelsPanel panel;
+
 	@Inject
 	Client client;
+
 	@Inject
 	private ClientThread clientThread;
+
 	@Inject
 	private GielinorTravelsConfig config;
+
 	@Inject
 	private ClientToolbar clientToolbar;
+
 	@Inject
 	private OverlayManager overlayManager;
+
 	@Inject
 	private LocationOverlay overlay;
+
 	@Inject
 	private SSEImageClient sseImageClient;
+
+	@Inject
+	private AudioManager audioManager;
+
 	private NavigationButton navButton;
 	private WorldPoint destination;
 
@@ -87,7 +98,7 @@ public class GielinorTravelsPlugin extends Plugin
 	{
 		overlayManager.add(overlay);
 
-		panel = new GielinorTravelsPanel(this, sseImageClient);
+		panel = new GielinorTravelsPanel(this, sseImageClient, config);
 
 		final BufferedImage icon = ImageUtil.loadImageResource(GielinorTravelsPlugin.class, "/icon.png");
 
@@ -101,6 +112,8 @@ public class GielinorTravelsPlugin extends Plugin
 		clientToolbar.addNavigation(navButton);
 
 		setDestination(new WorldPoint(3245, 3225, 0));
+
+		audioManager.setVolume(config.audioVolume());
 
 		log.info("Gielinor Travels started!");
 	}
@@ -160,11 +173,17 @@ public class GielinorTravelsPlugin extends Plugin
 	public void displayScore(String score)
 	{
 		clientThread.invoke(() -> client.addChatMessage(ChatMessageType.GAMEMESSAGE, "", "You reached the destination! You got " + score + " points!", null));
+		audioManager.playSound();
 	}
 
 	public void displayWinner()
 	{
 		clientThread.invoke(() -> client.addChatMessage(ChatMessageType.GAMEMESSAGE, "", "Congratulations! You were the first to reach the destination!", null));
+	}
+
+	public void displayAlreadyComplete()
+	{
+		clientThread.invoke(() -> client.addChatMessage(ChatMessageType.GAMEMESSAGE, "", "You have already completed this location!", null));
 	}
 
 	public void oneMinuteWarning()
