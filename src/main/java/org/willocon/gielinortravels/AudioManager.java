@@ -1,11 +1,10 @@
 package org.willocon.gielinortravels;
 
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import net.runelite.client.audio.AudioPlayer;
 import javax.inject.Inject;
 import javax.inject.Singleton;
-import javax.sound.sampled.LineUnavailableException;
-import javax.sound.sampled.UnsupportedAudioFileException;
 import java.io.*;
 
 
@@ -21,6 +20,7 @@ public class AudioManager
 
 	private float gain = 0f;
 
+	@SneakyThrows
 	public synchronized void playSound()
 	{
 		setVolume(config.audioVolume());
@@ -35,7 +35,7 @@ public class AudioManager
 			}
 			audioPlayer.play(audioStream, gain);
 		}
-		catch (IOException | LineUnavailableException | UnsupportedAudioFileException e)
+		catch (IOException e)
 		{
 			log.error("Error playing sound: ", e);
 		}
