@@ -89,8 +89,7 @@ public class SSEImageClient
 			@Override
 			public void onFailure(Call call, IOException e)
 			{
-				log.error("Failed to join queue: {}", e.getMessage());
-				e.printStackTrace();
+				log.error("Failed to join queue", e);
 			}
 
 			@Override
@@ -124,8 +123,7 @@ public class SSEImageClient
 			@Override
 			public void onFailure(Call call, IOException e)
 			{
-				log.error("Failed to leave queue: {}", e.getMessage());
-				e.printStackTrace();
+				log.error("Failed to leave queue", e);
 			}
 
 			@Override
@@ -159,8 +157,7 @@ public class SSEImageClient
 			@Override
 			public void onFailure(Call call, IOException e)
 			{
-				log.error("Failed to send completed: {}", e.getMessage());
-				e.printStackTrace();
+				log.error("Failed to send completed", e);
 			}
 
 			@Override
@@ -262,8 +259,8 @@ public class SSEImageClient
 		String imageUrl = config.urlEndpoint() + imageRelative;
 		String csvUrl = config.urlEndpoint() + csvRelative;
 
-		log.debug("Loading image: " + imageUrl);
-		log.debug("Downloading CSV: " + csvUrl);
+		log.debug("Loading image: {}", imageUrl);
+		log.debug("Downloading CSV: {}", csvUrl);
 
 		// Download CSV asynchronously
 		Request csvRequest = new Request.Builder().url(csvUrl).build();
@@ -272,8 +269,7 @@ public class SSEImageClient
 			@Override
 			public void onFailure(Call call, IOException e)
 			{
-				log.error("Failed to download CSV: " + e.getMessage());
-				e.printStackTrace();
+				log.error("Failed to download CSV", e);
 			}
 
 			@Override
@@ -282,13 +278,13 @@ public class SSEImageClient
 				if (response.body() != null)
 				{
 					downloadedCsv = response.body().string();
-					log.debug("Loaded csv data: " + downloadedCsv);
+					log.debug("Loaded csv data: {}", downloadedCsv);
 
 					// Now download the image asynchronously
 					try
 					{
 						downloadedImage = loadImage(imageUrl);
-						log.debug("Loaded image: " + downloadedImage.getWidth() + "x" + downloadedImage.getHeight());
+						log.debug("Loaded image: {}x{}", downloadedImage.getWidth(), downloadedImage.getHeight());
 
 						// Call the completion callback
 						if (onComplete != null)
@@ -298,8 +294,7 @@ public class SSEImageClient
 					}
 					catch (IOException e)
 					{
-						log.error("Failed to download image: " + e.getMessage());
-						e.printStackTrace();
+						log.error("Failed to download image", e);
 					}
 				}
 				response.close();
